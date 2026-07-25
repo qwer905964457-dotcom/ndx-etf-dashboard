@@ -22,7 +22,7 @@ REQUIRED_CODES = {
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-        "Chrome/126.0 Safari/537.36 ndx-etf-dashboard/2.0"
+        "Chrome/126.0 Safari/537.36 ndx-etf-dashboard/2.1"
     ),
     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
 }
@@ -46,6 +46,11 @@ def get(url: str, *, timeout: int = 25) -> requests.Response:
     response = SESSION.get(url, timeout=timeout)
     response.raise_for_status()
     return response
+
+
+def parse_number(text: str) -> float | None:
+    match = re.search(r"-?\d+(?:\.\d+)?", text.replace(",", ""))
+    return round(float(match.group(0)), 2) if match else None
 
 
 def parse_percent(text: str) -> float | None:
@@ -117,14 +122,16 @@ def fetch_haoetf(code: str) -> dict | None:
 def fetch_stockstar(code: str) -> dict | None:
     url = f"https://fund.stockstar.com/funds/f10/fundzyj_{code}.html"
     response = get(url)
-    soup = BeautifulSoup(response.content, "html.parser")
+    response.encoding = response.apparent_encoding or response.encoding
+    soup = BeautifulSoup(response.text, "html.parser")
 
     for row in soup.find_all("tr"):
         cells = [cell.get_text(" ", strip=True) for cell in row.find_all(["td", "th"])]
         if len(cells) < 3 or not re.fullmatch(r"\d+", cells[0]):
             continue
         premium_date = normalize_date(cells[1])
-        premium = parse_percent(cells[2])
+        # 该页面表头写“折溢价率(%)”，数据单元格本身通常只有“7.87”，不含%号。
+        premium = parse_number(cells[2])
         if premium_date and premium is not None:
             return {
                 "premium": premium,
