@@ -1,6 +1,7 @@
 {
-  "updated_at": "2026-07-25 20:45:00",
-  "source_note": "溢价参考HaoETF公开页面（同口径最新溢价）；费率参考基金公开资料；VIX来自Cboe，NDX来自Nasdaq。缺少可靠值的字段保留为空。综合评分为页面比较分：100 - 4×溢价率 - 10×综合费率，仅用于同页横向比较。",
+  "updated_at": "2026-07-25 21:52:00",
+  "market_data_as_of": "2026-07-21 至 2026-07-23（各产品日期见明细）",
+  "source_note": "公开数据已补齐到12只ETF。溢价优先采用HaoETF公开页面；缺项采用基金公司风险提示公告或证券之星折溢价历史。每只ETF保留premium_date和premium_source。综合评分=100-4×溢价率-10×综合费率，仅用于同页横向比较。",
   "risk": {
     "vix": 18.58,
     "ndx": 28091.35,
@@ -11,17 +12,17 @@
     "pe": null
   },
   "funds": [
-    {"code":"159941","company":"广发","name":"纳指100 ETF","premium":8.56,"fee":1.00,"tracking":null,"score":56,"grade":"C｜溢价偏高","reason":"综合费率1.00%，最新溢价8.56%，当前更适合等待溢价回落。"},
-    {"code":"159632","company":"华安","name":"纳指100 ETF","premium":6.48,"fee":0.80,"tracking":null,"score":66,"grade":"B｜可比较","reason":"最新溢价6.48%，综合费率0.80%，在已取得同口径溢价的产品中处于较低区间。"},
-    {"code":"513100","company":"国泰","name":"纳指100 ETF","premium":9.20,"fee":0.80,"tracking":null,"score":55,"grade":"C｜溢价偏高","reason":"综合费率0.80%，但最新溢价9.20%，当前溢价风险较高。"},
-    {"code":"513300","company":"华夏","name":"纳指100 ETF","premium":7.05,"fee":0.80,"tracking":null,"score":64,"grade":"B｜可比较","reason":"综合费率0.80%，最新溢价7.05%，可继续比较但尚未进入5%观察区。"},
-    {"code":"513390","company":"博时","name":"纳指100 ETF","premium":6.50,"fee":0.65,"tracking":null,"score":68,"grade":"A｜当前优选","reason":"综合费率0.65%，最新溢价6.50%，在已取得完整数据的产品中费率与溢价组合较优。"},
-    {"code":"513870","company":"富国","name":"纳指100 ETF","premium":null,"fee":0.60,"tracking":null,"score":null,"grade":"待补溢价","reason":"综合费率0.60%，但暂未取得可靠同口径溢价，暂不参与综合排序。"},
-    {"code":"159659","company":"招商","name":"纳指100 ETF","premium":6.84,"fee":0.65,"tracking":null,"score":66,"grade":"B｜可比较","reason":"综合费率0.65%，最新溢价6.84%，费率较低但溢价仍高于5%。"},
-    {"code":"513110","company":"华泰柏瑞","name":"纳指100 ETF","premium":6.50,"fee":1.00,"tracking":null,"score":64,"grade":"B｜可比较","reason":"最新溢价6.50%，但综合费率1.00%，长期持有成本相对较高。"},
-    {"code":"159513","company":"大成","name":"纳指100 ETF","premium":null,"fee":1.00,"tracking":null,"score":null,"grade":"待补溢价","reason":"综合费率1.00%，但暂未取得可靠同口径溢价，暂不参与综合排序。"},
-    {"code":"159501","company":"嘉实","name":"纳指100 ETF","premium":null,"fee":0.60,"tracking":null,"score":null,"grade":"待补溢价","reason":"综合费率0.60%，但暂未取得可靠同口径溢价，暂不参与综合排序。"},
-    {"code":"159660","company":"汇添富","name":"纳指100 ETF","premium":6.68,"fee":0.65,"tracking":null,"score":67,"grade":"B｜可比较","reason":"综合费率0.65%，最新溢价6.68%，在已取得完整数据的产品中综合表现靠前。"},
-    {"code":"159696","company":"易方达","name":"纳指100 ETF","premium":null,"fee":0.60,"tracking":null,"score":null,"grade":"待补溢价","reason":"综合费率0.60%，但暂未取得可靠同口径溢价，暂不参与综合排序。"}
+    {"code":"159941","company":"广发","name":"纳指100 ETF","premium":8.56,"premium_date":"2026-07-23","premium_source":"HaoETF","fee":1.00,"tracking":null,"score":56,"grade":"C｜溢价偏高","reason":"综合费率1.00%，溢价8.56%，当前更适合等待溢价回落。"},
+    {"code":"159632","company":"华安","name":"纳指100 ETF","premium":6.48,"premium_date":"2026-07-23","premium_source":"HaoETF","fee":0.80,"tracking":null,"score":66,"grade":"B｜可比较","reason":"溢价6.48%，综合费率0.80%，在当前样本中处于较低区间。"},
+    {"code":"513100","company":"国泰","name":"纳指100 ETF","premium":9.10,"premium_date":"2026-07-23","premium_source":"HaoETF","fee":0.80,"tracking":null,"score":56,"grade":"C｜溢价偏高","reason":"综合费率0.80%，但溢价9.10%，当前溢价风险较高。"},
+    {"code":"513300","company":"华夏","name":"纳指100 ETF","premium":7.05,"premium_date":"2026-07-23","premium_source":"HaoETF","fee":0.80,"tracking":null,"score":64,"grade":"B｜可比较","reason":"综合费率0.80%，溢价7.05%，可继续比较但尚未进入5%观察区。"},
+    {"code":"513390","company":"博时","name":"纳指100 ETF","premium":6.50,"premium_date":"2026-07-23","premium_source":"HaoETF","fee":0.65,"tracking":null,"score":68,"grade":"A｜当前优选","reason":"综合费率0.65%，溢价6.50%，费率与溢价组合相对较优。"},
+    {"code":"513870","company":"富国","name":"纳指100 ETF","premium":8.46,"premium_date":"2026-07-23","premium_source":"证券之星折溢价历史","fee":0.60,"tracking":null,"score":60,"grade":"B-｜谨慎比较","reason":"综合费率0.60%，但溢价8.46%，长期成本低，当前买入价格偏贵。"},
+    {"code":"159659","company":"招商","name":"纳指100 ETF","premium":6.75,"premium_date":"2026-07-23","premium_source":"HaoETF","fee":0.65,"tracking":null,"score":67,"grade":"B+｜靠前","reason":"综合费率0.65%，溢价6.75%，费率较低但溢价仍高于5%。"},
+    {"code":"513110","company":"华泰柏瑞","name":"纳指100 ETF","premium":6.50,"premium_date":"2026-07-23","premium_source":"HaoETF","fee":1.00,"tracking":null,"score":64,"grade":"B｜可比较","reason":"溢价6.50%，但综合费率1.00%，长期持有成本相对较高。"},
+    {"code":"159513","company":"大成","name":"纳指100 ETF","premium":7.87,"premium_date":"2026-07-23","premium_source":"证券之星折溢价历史","fee":1.00,"tracking":null,"score":59,"grade":"C+｜等待回落","reason":"溢价7.87%，综合费率1.00%，当前不具备明显价格优势。"},
+    {"code":"159501","company":"嘉实","name":"纳指100 ETF","premium":10.25,"premium_date":"2026-07-21","premium_source":"嘉实基金溢价风险提示公告计算","fee":0.60,"tracking":"年化跟踪误差1.10%","score":53,"grade":"C｜溢价较高","reason":"综合费率0.60%、跟踪误差公开，但公告口径溢价约10.25%，当前应重点防范溢价回落。"},
+    {"code":"159660","company":"汇添富","name":"纳指100 ETF","premium":6.68,"premium_date":"2026-07-23","premium_source":"HaoETF","fee":0.65,"tracking":null,"score":67,"grade":"B+｜靠前","reason":"综合费率0.65%，溢价6.68%，在当前样本中综合表现靠前。"},
+    {"code":"159696","company":"易方达","name":"纳指100 ETF","premium":6.88,"premium_date":"2026-07-22","premium_source":"易方达基金溢价风险提示公告计算","fee":0.60,"tracking":null,"score":66,"grade":"B｜可比较","reason":"综合费率0.60%，公告口径溢价约6.88%，费率较低但仍未进入5%观察区。"}
   ]
 }
