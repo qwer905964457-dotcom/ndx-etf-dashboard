@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-25 21:56:50",
+  "updated_at": "2026-07-25 21:59:12",
   "market_data_as_of": "2026-07-23",
   "source_note": "ETF溢价优先读取HaoETF公开页面，失败时回退到证券之星折溢价历史；VIX与纳指100使用Yahoo Finance公开行情序列。抓取失败会保留旧值，不会用新时间覆盖成伪最新。综合评分=100-4×溢价率-10×综合费率。",
   "risk": {
@@ -93,7 +93,8 @@
       "tracking": null,
       "score": 60,
       "grade": "B｜可比较",
-      "reason": "公开口径溢价8.46%（2026-07-23），综合费率0.60%；评分仅用于本页横向比较。"
+      "reason": "公开口径溢价8.46%（2026-07-23），综合费率0.60%；评分仅用于本页横向比较。",
+      "source_url": "https://fund.stockstar.com/funds/f10/fundzyj_513870.html"
     },
     {
       "code": "159659",
@@ -134,20 +135,22 @@
       "tracking": null,
       "score": 59,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价7.87%（2026-07-23），综合费率1.00%；评分仅用于本页横向比较。"
+      "reason": "公开口径溢价7.87%（2026-07-23），综合费率1.00%；评分仅用于本页横向比较。",
+      "source_url": "https://fund.stockstar.com/funds/f10/fundzyj_159513.html"
     },
     {
       "code": "159501",
       "company": "嘉实",
       "name": "纳指100 ETF",
-      "premium": 10.25,
-      "premium_date": "2026-07-21",
-      "premium_source": "嘉实基金溢价风险提示公告计算",
+      "premium": 10.58,
+      "premium_date": "2026-07-23",
+      "premium_source": "证券之星折溢价历史",
       "fee": 0.6,
       "tracking": "年化跟踪误差1.10%",
-      "score": 53,
+      "score": 52,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价10.25%（2026-07-21），综合费率0.60%；评分仅用于本页横向比较。"
+      "reason": "公开口径溢价10.58%（2026-07-23），综合费率0.60%；评分仅用于本页横向比较。",
+      "source_url": "https://fund.stockstar.com/funds/f10/fundzyj_159501.html"
     },
     {
       "code": "159660",
@@ -167,26 +170,23 @@
       "code": "159696",
       "company": "易方达",
       "name": "纳指100 ETF",
-      "premium": 6.88,
-      "premium_date": "2026-07-22",
-      "premium_source": "易方达基金溢价风险提示公告计算",
+      "premium": 9.52,
+      "premium_date": "2026-07-23",
+      "premium_source": "证券之星折溢价历史",
       "fee": 0.6,
       "tracking": null,
-      "score": 66,
-      "grade": "B+｜靠前",
-      "reason": "公开口径溢价6.88%（2026-07-22），综合费率0.60%；评分仅用于本页横向比较。"
+      "score": 56,
+      "grade": "C｜等待回落",
+      "reason": "公开口径溢价9.52%（2026-07-23），综合费率0.60%；评分仅用于本页横向比较。",
+      "source_url": "https://fund.stockstar.com/funds/f10/fundzyj_159696.html"
     }
   ],
   "history": {},
-  "checked_at": "2026-07-25 21:56:50",
+  "checked_at": "2026-07-25 21:59:12",
   "update_status": {
-    "funds_updated": 8,
+    "funds_updated": 12,
     "risk_series_updated": 0,
     "errors": [
-      "513870: HaoETF: 页面未解析到数据; 证券之星: 页面未解析到数据",
-      "159513: HaoETF: 页面未解析到数据; 证券之星: 页面未解析到数据",
-      "159501: HaoETF: 页面未解析到数据; 证券之星: 页面未解析到数据",
-      "159696: HaoETF: 页面未解析到数据; 证券之星: 页面未解析到数据",
       "^VIX: HTTPError: 429 Client Error: Too Many Requests for url: https://query1.finance.yahoo.com/v8/finance/chart/%5EVIX?range=6mo&interval=1d",
       "^NDX: HTTPError: 429 Client Error: Too Many Requests for url: https://query1.finance.yahoo.com/v8/finance/chart/%5ENDX?range=6mo&interval=1d"
     ]
