@@ -25,13 +25,15 @@
     </aside>
   </header>
 
-  <nav class="tabs">
+  <nav class="tabs" id="mainTabs" aria-label="主导航">
     <button class="active" data-target="decision">今日决策</button>
     <button data-target="all-etf">全部ETF</button>
     <button data-target="long-term">长期比较</button>
     <button data-target="risk">风险指标</button>
     <button data-target="alerts">预警设置</button>
   </nav>
+
+  <div id="panelTop" class="panel-top"></div>
 
   <section id="decision" class="panel active">
     <div class="two-col">
@@ -63,30 +65,12 @@
       </article>
     </div>
 
-    <article class="card gold-card" id="long-term">
-      <h2>👑 3 长期优选 <small>（计划持有5年以上）</small></h2>
-      <div id="topFunds" class="top-funds"></div>
+    <article class="card green-card">
+      <h2>💡 买入建议</h2>
+      <div class="buy-big" id="buySignal">暂无数据</div>
+      <p id="buyReason">根据当前最低溢价、VIX与纳指走势判断。</p>
+      <ul id="buyChecks"></ul>
     </article>
-
-    <div class="two-col">
-      <article class="card green-card">
-        <h2>💡 4 买入建议</h2>
-        <div class="buy-big" id="buySignal">暂无数据</div>
-        <p id="buyReason">根据当前最低溢价、VIX与纳指走势判断。</p>
-        <ul id="buyChecks"></ul>
-      </article>
-
-      <article class="card blue-card" id="risk">
-        <h2>⑤ 风险指标（纳指100）</h2>
-        <div id="riskGrid" class="risk-list"></div>
-      </article>
-    </div>
-
-    <div class="trend-grid">
-      <article class="trend-card"><h3>VIX走势 <span id="trendVix">暂无数据</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
-      <article class="trend-card"><h3>纳指100走势 <span id="trendNdx">暂无数据</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
-      <article class="trend-card"><h3>波动率（20日） <span id="trendVol">暂无数据</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
-    </div>
   </section>
 
   <section id="all-etf" class="panel">
@@ -103,7 +87,28 @@
     <div id="fundList" class="fund-list"></div>
   </section>
 
-  <section id="alerts" class="panel"><article class="card"><h2>🔔 预警设置</h2><p>当前预警规则：溢价低于5%/3%，单日跌幅2%/3%/5%，NDX回撤8%/12%/15%/20%，VIX达到25/30/35。</p></article></section>
+  <section id="long-term" class="panel">
+    <article class="card gold-card">
+      <h2>👑 长期优选 <small>（计划持有5年以上）</small></h2>
+      <div id="topFunds" class="top-funds"></div>
+    </article>
+  </section>
+
+  <section id="risk" class="panel">
+    <article class="card blue-card">
+      <h2>⑤ 风险指标（纳指100）</h2>
+      <div id="riskGrid" class="risk-list"></div>
+    </article>
+    <div class="trend-grid">
+      <article class="trend-card"><h3>VIX走势 <span id="trendVix">暂无数据</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
+      <article class="trend-card"><h3>纳指100走势 <span id="trendNdx">暂无数据</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
+      <article class="trend-card"><h3>波动率（20日） <span id="trendVol">暂无数据</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
+    </div>
+  </section>
+
+  <section id="alerts" class="panel">
+    <article class="card"><h2>🔔 预警设置</h2><p>当前预警规则：溢价低于5%/3%，单日跌幅2%/3%/5%，NDX回撤8%/12%/15%/20%，VIX达到25/30/35。</p></article>
+  </section>
 
   <footer>🐱 该页面仅用于信息整理和比较，不构成任何投资建议。 ♡</footer>
 </main>
