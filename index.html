@@ -5,114 +5,171 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fbfaf5">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <title>纳指100 ETF 监控</title>
-  <link rel="stylesheet" href="style.css?v=20260725-3">
+  <title>纳指长期投资助手</title>
+  <link rel="stylesheet" href="style.css?v=20260726-1">
 </head>
 <body>
 <main class="page">
   <header class="hero">
     <div class="mascot">🐧</div>
     <div class="hero-copy">
-      <h1>纳指100 ETF 监控 <span>♡</span></h1>
-      <p>数据更新：<b id="updatedAt">加载中…</b> <button id="refreshBtn">↻</button></p>
-      <p>数据来源：<b id="sourceNote">加载中…</b></p>
+      <p class="eyebrow">Long-term Nasdaq Investor Dashboard</p>
+      <h1>纳指长期投资助手 <span>♡</span></h1>
+      <p>数据更新：<b id="updatedAt">加载中…</b> <button id="refreshBtn" aria-label="刷新页面">↻</button></p>
+      <p>数据日期：<b id="marketDate">加载中…</b> · 数据来源：<b id="sourceNote">加载中…</b></p>
     </div>
     <aside class="alert-box">
-      <div><b>🔔 预警状态</b><span id="alertState">观察中</span></div>
-      <p>溢价低于5%：<b id="underFiveCount">加载中…</b></p>
-      <p>3%以内：<b id="underThreeCount">加载中…</b></p>
-      <p>今日涨跌：<b id="todayMove">加载中…</b></p>
-      <p>溢价变动：<b>暂无数据</b></p>
+      <div><b>今日买入评分</b><span id="heroScore">--</span></div>
+      <p>长期持仓：<b id="heroHolding">加载中…</b></p>
+      <p>当前溢价：<b id="heroPremium">加载中…</b></p>
+      <p>历史位置：<b id="heroPercentile">加载中…</b></p>
+      <p>建议动作：<b id="heroAction">加载中…</b></p>
     </aside>
   </header>
 
   <nav class="tabs" id="mainTabs" aria-label="主导航">
-    <button class="active" data-target="decision">今日决策</button>
-    <button data-target="all-etf">全部ETF</button>
-    <button data-target="long-term">长期比较</button>
-    <button data-target="risk">风险指标</button>
-    <button data-target="alerts">预警设置</button>
+    <button class="active" data-target="home">首页决策</button>
+    <button data-target="my-etf">我的ETF</button>
+    <button data-target="market">ETF市场</button>
+    <button data-target="valuation">纳指估值</button>
+    <button data-target="data-center">数据中心</button>
   </nav>
 
   <div id="loadStatus" class="load-status">正在读取 data.json…</div>
 
-  <section id="decision" class="panel active">
-    <div class="two-col">
-      <article class="card pink-card">
-        <h2>🏆 1 综合推荐</h2>
-        <div class="fund-code" id="bestCode">加载中…</div>
-        <div class="fund-name" id="bestName">加载中…</div>
-        <span class="badge pink" id="bestGrade">加载中…</span>
-        <div class="metrics four">
-          <div><span>溢价率</span><b id="bestPremium">加载中…</b></div>
-          <div><span>费率(年)</span><b id="bestFee">加载中…</b></div>
-          <div><span>近1年收益</span><b>暂无数据</b></div>
-          <div><span>跟踪偏离</span><b id="bestTracking">暂无数据</b></div>
-        </div>
-        <p class="reason"><b>推荐理由：</b><span id="bestReason">加载中…</span></p>
+  <section id="home" class="panel active">
+    <div class="decision-grid">
+      <article class="card hero-card">
+        <div class="section-label">今天只回答一个问题</div>
+        <h2 id="actionTitle">加载中…</h2>
+        <div class="score-ring" id="scoreRing">--</div>
+        <p class="big-advice" id="actionText">加载中…</p>
+        <ul id="actionReasons" class="check-list"></ul>
       </article>
 
       <article class="card blue-card">
-        <h2>🚩 2 最低溢价</h2>
-        <div class="fund-code" id="lowestCode">加载中…</div>
-        <div class="fund-name" id="lowestName">加载中…</div>
-        <span class="badge blue">溢价最低</span>
-        <div class="single-metric"><span>当前溢价率</span><b id="lowestPremium">加载中…</b></div>
-        <div class="metrics two">
-          <div><span>距离3%目标线</span><b id="toThree">加载中…</b></div>
-          <div><span>距离5%目标线</span><b id="toFive">加载中…</b></div>
+        <div class="section-label">固定分析一只</div>
+        <h2>我的长期持仓</h2>
+        <div class="fund-code" id="holdingCode">加载中…</div>
+        <div class="fund-name" id="holdingName">加载中…</div>
+        <div class="metrics four">
+          <div><span>当前溢价</span><b id="holdingPremium">加载中…</b></div>
+          <div><span>历史百分位</span><b id="holdingPercentile">加载中…</b></div>
+          <div><span>综合费率</span><b id="holdingFee">加载中…</b></div>
+          <div><span>历史样本</span><b id="holdingSamples">加载中…</b></div>
         </div>
-        <p class="zone" id="baseZone">加载中…</p>
+        <p class="reason" id="holdingReason">加载中…</p>
       </article>
     </div>
 
-    <article class="card green-card">
-      <h2>💡 买入建议</h2>
-      <div class="buy-big" id="buySignal">加载中…</div>
-      <p id="buyReason">根据当前最低溢价、VIX与纳指走势判断。</p>
-      <ul id="buyChecks"></ul>
+    <div class="three-col">
+      <article class="card compact-card">
+        <h3>① 溢价</h3>
+        <b id="premiumCardValue">--</b>
+        <p id="premiumCardNote">加载中…</p>
+      </article>
+      <article class="card compact-card">
+        <h3>② 纳指回撤</h3>
+        <b id="drawdownCardValue">--</b>
+        <p id="drawdownCardNote">加载中…</p>
+      </article>
+      <article class="card compact-card">
+        <h3>③ VIX情绪</h3>
+        <b id="vixCardValue">--</b>
+        <p id="vixCardNote">加载中…</p>
+      </article>
+    </div>
+
+    <article class="card warning-card">
+      <h2>下跌时溢价监控</h2>
+      <p id="fallPremiumWarning">加载中…</p>
     </article>
   </section>
 
-  <section id="all-etf" class="panel">
+  <section id="my-etf" class="panel">
+    <article class="card gold-card">
+      <div class="section-label">以后首页只看它</div>
+      <h2>选择我的长期持仓</h2>
+      <div class="selector-line">
+        <select id="holdingSelect" aria-label="选择长期持仓ETF"></select>
+        <button id="saveHoldingBtn">设为首页主角</button>
+      </div>
+      <p id="holdingConfigNote">加载中…</p>
+    </article>
+
+    <div class="two-col">
+      <article class="card blue-card">
+        <h2 id="myTitle">我的ETF档案</h2>
+        <div class="metrics four">
+          <div><span>当前溢价</span><b id="myPremium">--</b></div>
+          <div><span>30点均值</span><b id="myAvg30">--</b></div>
+          <div><span>180点百分位</span><b id="myPct180">--</b></div>
+          <div><span>综合费率</span><b id="myFee">--</b></div>
+        </div>
+        <div id="premiumSpark" class="sparkline">历史数据累积中</div>
+      </article>
+
+      <article class="card green-card">
+        <h2>定投执行规则</h2>
+        <ul id="planList" class="check-list"></ul>
+      </article>
+    </div>
+  </section>
+
+  <section id="market" class="panel">
     <div class="toolbar card">
+      <div>
+        <h2>ETF市场总览</h2>
+        <p>这里只做横向参考，不建议每天换基金。</p>
+      </div>
       <div class="filters">
         <button class="active" data-filter="all">全部</button>
-        <button data-filter="under3">3%</button>
-        <button data-filter="under5">5%</button>
-        <button data-filter="wait">等待回落</button>
-        <button data-filter="weak">跟踪偏弱</button>
+        <button data-filter="under7">7%以内</button>
+        <button data-filter="high">高溢价</button>
+        <button data-filter="lowfee">低费率</button>
       </div>
-      <select id="sortSelect"><option value="score">综合评分</option><option value="premium">溢价排序</option></select>
+      <select id="sortSelect" aria-label="排序方式">
+        <option value="score">综合评分</option>
+        <option value="premium">溢价从低到高</option>
+        <option value="fee">费率从低到高</option>
+      </select>
+    </div>
+    <div class="two-col">
+      <article class="card pink-card"><h2>最低溢价排行</h2><div id="lowestList" class="rank-list"></div></article>
+      <article class="card blue-card"><h2>低费率排行</h2><div id="feeList" class="rank-list"></div></article>
     </div>
     <div id="fundList" class="fund-list"></div>
-  </section>
 
-  <section id="long-term" class="panel">
-    <article class="card gold-card">
-      <h2>👑 长期优选 <small>（计划持有5年以上）</small></h2>
-      <div id="topFunds" class="top-funds"></div>
+    <article class="card green-card">
+      <h2>场外每日限额快照</h2>
+      <p id="otcNote">加载中…</p>
+      <div id="otcList" class="otc-list"></div>
     </article>
   </section>
 
-  <section id="risk" class="panel">
+  <section id="valuation" class="panel">
     <article class="card blue-card">
-      <h2>⑤ 风险指标（纳指100）</h2>
+      <h2>纳指估值与风险</h2>
       <div id="riskGrid" class="risk-list"></div>
+      <p id="valuationSummary" class="reason">加载中…</p>
     </article>
     <div class="trend-grid">
-      <article class="trend-card"><h3>VIX走势 <span id="trendVix">加载中…</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
-      <article class="trend-card"><h3>纳指100走势 <span id="trendNdx">加载中…</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
-      <article class="trend-card"><h3>波动率（20日） <span id="trendVol">加载中…</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
+      <article class="trend-card"><h3>VIX <span id="trendVix">加载中…</span></h3><div class="spark placeholder" id="vixSpark">趋势数据暂无</div></article>
+      <article class="trend-card"><h3>纳指100 <span id="trendNdx">加载中…</span></h3><div class="spark placeholder" id="ndxSpark">趋势数据暂无</div></article>
+      <article class="trend-card"><h3>波动率 <span id="trendVol">加载中…</span></h3><div class="spark placeholder">等待行情源恢复</div></article>
     </div>
   </section>
 
-  <section id="alerts" class="panel">
-    <article class="card"><h2>🔔 预警设置</h2><p>当前预警规则：溢价低于5%/3%，单日跌幅2%/3%/5%，NDX回撤8%/12%/15%/20%，VIX达到25/30/35。</p></article>
+  <section id="data-center" class="panel">
+    <article class="card">
+      <h2>数据中心</h2>
+      <div id="dataGrid" class="risk-list"></div>
+      <pre id="errorBox" class="error-box">加载中…</pre>
+    </article>
   </section>
 
-  <footer>🐱 该页面仅用于信息整理和比较，不构成任何投资建议。 ♡</footer>
+  <footer>🐱 该页面只做信息整理和纪律提醒，不构成任何投资建议。长期持有也要控制仓位和现金流。 ♡</footer>
 </main>
-<script src="app.js?v=20260725-3" defer></script>
+<script src="app.js?v=20260726-1" defer></script>
 </body>
 </html>
