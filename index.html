@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#fbfaf5">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>纳指100 ETF 监控</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20260725-3">
 </head>
 <body>
 <main class="page">
@@ -13,14 +14,14 @@
     <div class="mascot">🐧</div>
     <div class="hero-copy">
       <h1>纳指100 ETF 监控 <span>♡</span></h1>
-      <p>数据更新：<b id="updatedAt">暂无数据</b> <button id="refreshBtn">↻</button></p>
-      <p>数据来源：<b id="sourceNote">暂无数据</b></p>
+      <p>数据更新：<b id="updatedAt">加载中…</b> <button id="refreshBtn">↻</button></p>
+      <p>数据来源：<b id="sourceNote">加载中…</b></p>
     </div>
     <aside class="alert-box">
       <div><b>🔔 预警状态</b><span id="alertState">观察中</span></div>
-      <p>溢价低于5%：<b id="underFiveCount">暂无数据</b></p>
-      <p>3%以内：<b id="underThreeCount">暂无数据</b></p>
-      <p>今日涨跌：<b id="todayMove">暂无数据</b></p>
+      <p>溢价低于5%：<b id="underFiveCount">加载中…</b></p>
+      <p>3%以内：<b id="underThreeCount">加载中…</b></p>
+      <p>今日涨跌：<b id="todayMove">加载中…</b></p>
       <p>溢价变动：<b>暂无数据</b></p>
     </aside>
   </header>
@@ -33,41 +34,41 @@
     <button data-target="alerts">预警设置</button>
   </nav>
 
-  <div id="panelTop" class="panel-top"></div>
+  <div id="loadStatus" class="load-status">正在读取 data.json…</div>
 
   <section id="decision" class="panel active">
     <div class="two-col">
       <article class="card pink-card">
         <h2>🏆 1 综合推荐</h2>
-        <div class="fund-code" id="bestCode">暂无数据</div>
-        <div class="fund-name" id="bestName">暂无数据</div>
-        <span class="badge pink" id="bestGrade">暂无数据</span>
+        <div class="fund-code" id="bestCode">加载中…</div>
+        <div class="fund-name" id="bestName">加载中…</div>
+        <span class="badge pink" id="bestGrade">加载中…</span>
         <div class="metrics four">
-          <div><span>溢价率</span><b id="bestPremium">暂无数据</b></div>
-          <div><span>费率(年)</span><b id="bestFee">暂无数据</b></div>
+          <div><span>溢价率</span><b id="bestPremium">加载中…</b></div>
+          <div><span>费率(年)</span><b id="bestFee">加载中…</b></div>
           <div><span>近1年收益</span><b>暂无数据</b></div>
           <div><span>跟踪偏离</span><b id="bestTracking">暂无数据</b></div>
         </div>
-        <p class="reason"><b>推荐理由：</b><span id="bestReason">暂无数据</span></p>
+        <p class="reason"><b>推荐理由：</b><span id="bestReason">加载中…</span></p>
       </article>
 
       <article class="card blue-card">
         <h2>🚩 2 最低溢价</h2>
-        <div class="fund-code" id="lowestCode">暂无数据</div>
-        <div class="fund-name" id="lowestName">暂无数据</div>
+        <div class="fund-code" id="lowestCode">加载中…</div>
+        <div class="fund-name" id="lowestName">加载中…</div>
         <span class="badge blue">溢价最低</span>
-        <div class="single-metric"><span>当前溢价率</span><b id="lowestPremium">暂无数据</b></div>
+        <div class="single-metric"><span>当前溢价率</span><b id="lowestPremium">加载中…</b></div>
         <div class="metrics two">
-          <div><span>距离3%目标线</span><b id="toThree">暂无数据</b></div>
-          <div><span>距离5%目标线</span><b id="toFive">暂无数据</b></div>
+          <div><span>距离3%目标线</span><b id="toThree">加载中…</b></div>
+          <div><span>距离5%目标线</span><b id="toFive">加载中…</b></div>
         </div>
-        <p class="zone" id="baseZone">暂无数据</p>
+        <p class="zone" id="baseZone">加载中…</p>
       </article>
     </div>
 
     <article class="card green-card">
       <h2>💡 买入建议</h2>
-      <div class="buy-big" id="buySignal">暂无数据</div>
+      <div class="buy-big" id="buySignal">加载中…</div>
       <p id="buyReason">根据当前最低溢价、VIX与纳指走势判断。</p>
       <ul id="buyChecks"></ul>
     </article>
@@ -100,9 +101,9 @@
       <div id="riskGrid" class="risk-list"></div>
     </article>
     <div class="trend-grid">
-      <article class="trend-card"><h3>VIX走势 <span id="trendVix">暂无数据</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
-      <article class="trend-card"><h3>纳指100走势 <span id="trendNdx">暂无数据</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
-      <article class="trend-card"><h3>波动率（20日） <span id="trendVol">暂无数据</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
+      <article class="trend-card"><h3>VIX走势 <span id="trendVix">加载中…</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
+      <article class="trend-card"><h3>纳指100走势 <span id="trendNdx">加载中…</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
+      <article class="trend-card"><h3>波动率（20日） <span id="trendVol">加载中…</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
     </div>
   </section>
 
@@ -112,6 +113,6 @@
 
   <footer>🐱 该页面仅用于信息整理和比较，不构成任何投资建议。 ♡</footer>
 </main>
-<script src="app.js" defer></script>
+<script src="app.js?v=20260725-3" defer></script>
 </body>
 </html>
