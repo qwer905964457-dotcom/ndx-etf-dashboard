@@ -232,17 +232,19 @@ def merge_premium_history(data: dict, *, limit: int = 260) -> tuple[int, list[st
             if date and isinstance(premium, (int, float)):
                 by_date[date] = round(float(premium), 2)
 
-        current_date = fund.get("premium_date")
-        current_premium = fund.get("premium")
-        if current_date and isinstance(current_premium, (int, float)):
-            by_date[current_date] = round(float(current_premium), 2)
-
         try:
             for item in fetch_stockstar_history(code, limit=limit):
                 by_date[item["date"]] = round(float(item["premium"]), 2)
             updated_codes += 1
         except Exception as exc:
             errors.append(f"{code} history: {type(exc).__name__}: {exc}")
+
+        # 同一天 HaoETF 与证券之星可能口径略有差异；首页决策使用当前 fund.premium，
+        # 所以历史库里当天值也优先采用当前展示值，避免百分位和页面溢价打架。
+        current_date = fund.get("premium_date")
+        current_premium = fund.get("premium")
+        if current_date and isinstance(current_premium, (int, float)):
+            by_date[current_date] = round(float(current_premium), 2)
 
         store[code] = [
             {"date": date, "premium": premium}
@@ -325,6 +327,56 @@ def ensure_defaults(data: dict) -> None:
     )
     data.setdefault("investment", {})
     data["investment"].setdefault("daily_amount_yuan", 200)
+    data.setdefault(
+        "otc_limits_note",
+        "场外每日限额为手动快照，额度变化很快，仅作资金安排参考；后续可接入自动数据源。",
+    )
+    data.setdefault(
+        "otc_limits",
+        [
+            {
+                "limit_yuan": 100,
+                "status": "可申购",
+                "funds": ["建信 539001/012752"],
+                "note": "普通代销 A/C 份额快照",
+            },
+            {
+                "limit_yuan": 10,
+                "status": "可申购",
+                "funds": [
+                    "宝盈 019736/019737",
+                    "大成 000834/008971",
+                    "华安 040046/014978",
+                    "华泰柏瑞 019524/019525",
+                    "汇添富 018966/018967",
+                    "摩根 019172/019173",
+                    "南方 016452/016453",
+                    "万家 019441/019442",
+                    "招商 019547/019548",
+                ],
+                "note": "多只基金处于10元/日档",
+            },
+            {
+                "limit_yuan": 5,
+                "status": "可申购",
+                "funds": ["广发 270042/006479"],
+                "note": "普通代销 A/C 份额快照",
+            },
+            {
+                "limit_yuan": 0,
+                "status": "暂停申购/当前不可买",
+                "funds": [
+                    "国泰 160213",
+                    "华夏 015299/015300",
+                    "嘉实 016532/016533",
+                    "天弘 018043/018044",
+                    "易方达 161130/012870",
+                    "博时 016055/016057",
+                ],
+                "note": "页面可能显示上限，但暂停申购时实际可买按0处理",
+            },
+        ],
+    )
 
 
 def main() -> None:
