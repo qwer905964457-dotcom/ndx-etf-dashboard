@@ -22,7 +22,7 @@ REQUIRED_CODES = {
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-        "Chrome/126.0 Safari/537.36 ndx-etf-dashboard/2.1"
+        "Chrome/126.0 Safari/537.36 ndx-etf-dashboard/2.2"
     ),
     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
 }
@@ -120,11 +120,26 @@ def fetch_haoetf(code: str) -> dict | None:
 
 
 def fetch_stockstar(code: str) -> dict | None:
+    rows = fetch_stockstar_history(code, limit=1)
+    if not rows:
+        return None
+    latest = rows[-1]
+    return {
+        "premium": latest["premium"],
+        "premium_date": latest["date"],
+        "premium_source": "证券之星折溢价历史",
+        "source_url": f"https://fund.stockstar.com/funds/f10/fundzyj_{code}.html",
+    }
+
+
+def fetch_stockstar_history(code: str, *, limit: int = 220) -> list[dict]:
+    """读取证券之星折溢价历史。返回按日期升序排列的 {date, premium}。"""
     url = f"https://fund.stockstar.com/funds/f10/fundzyj_{code}.html"
     response = get(url)
     response.encoding = response.apparent_encoding or response.encoding
     soup = BeautifulSoup(response.text, "html.parser")
 
+    by_date: dict[str, float] = {}
     for row in soup.find_all("tr"):
         cells = [cell.get_text(" ", strip=True) for cell in row.find_all(["td", "th"])]
         if len(cells) < 3 or not re.fullmatch(r"\d+", cells[0]):
@@ -133,13 +148,13 @@ def fetch_stockstar(code: str) -> dict | None:
         # 该页面表头写“折溢价率(%)”，数据单元格本身通常只有“7.87”，不含%号。
         premium = parse_number(cells[2])
         if premium_date and premium is not None:
-            return {
-                "premium": premium,
-                "premium_date": premium_date,
-                "premium_source": "证券之星折溢价历史",
-                "source_url": url,
-            }
-    return None
+            by_date[premium_date] = premium
+
+    rows = [
+        {"date": date, "premium": premium}
+        for date, premium in sorted(by_date.items())
+    ]
+    return rows[-limit:]
 
 
 def fetch_premium(code: str) -> dict:
@@ -177,7 +192,7 @@ def refresh_score(fund: dict) -> None:
     fund["grade"] = grade_for(score)
     fund["reason"] = (
         f"公开口径溢价{premium:.2f}%（{fund.get('premium_date', '日期未知')}），"
-        f"综合费率{fee:.2f}%；评分仅用于本页横向比较。"
+        f"综合费率{fee:.2f}%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。"
     )
 
 
@@ -198,6 +213,44 @@ def update_fund_premiums(data: dict) -> tuple[int, list[str]]:
             refresh_score(fund)
         time.sleep(0.2)
     return updated, errors
+
+
+def merge_premium_history(data: dict, *, limit: int = 260) -> tuple[int, list[str]]:
+    """为“溢价历史百分位”累积样本，不影响当天溢价展示。"""
+    history = data.setdefault("history", {})
+    store = history.setdefault("premium_by_code", {})
+    updated_codes = 0
+    errors: list[str] = []
+
+    for fund in data.get("funds", []):
+        code = str(fund.get("code"))
+        by_date: dict[str, float] = {}
+
+        for item in store.get(code, []):
+            date = item.get("date") or item.get("premium_date")
+            premium = item.get("premium", item.get("value"))
+            if date and isinstance(premium, (int, float)):
+                by_date[date] = round(float(premium), 2)
+
+        current_date = fund.get("premium_date")
+        current_premium = fund.get("premium")
+        if current_date and isinstance(current_premium, (int, float)):
+            by_date[current_date] = round(float(current_premium), 2)
+
+        try:
+            for item in fetch_stockstar_history(code, limit=limit):
+                by_date[item["date"]] = round(float(item["premium"]), 2)
+            updated_codes += 1
+        except Exception as exc:
+            errors.append(f"{code} history: {type(exc).__name__}: {exc}")
+
+        store[code] = [
+            {"date": date, "premium": premium}
+            for date, premium in sorted(by_date.items())[-limit:]
+        ]
+        time.sleep(0.15)
+
+    return updated_codes, errors
 
 
 def yahoo_series(symbol: str) -> tuple[list[str], list[float]]:
@@ -255,22 +308,37 @@ def update_risk(data: dict) -> tuple[int, list[str]]:
                     risk["change20"] = round((values[-1] / values[-21] - 1) * 100, 2)
                 risk["vol20"] = annualized_volatility(values, 20)
                 risk["vol60"] = annualized_volatility(values, 60)
+                rolling_high = max(values[-120:])
+                risk["drawdown_from_high"] = round((values[-1] / rolling_high - 1) * 100, 2)
             updates += 1
         except Exception as exc:
             errors.append(f"{symbol}: {type(exc).__name__}: {exc}")
     return updates, errors
 
 
+def ensure_defaults(data: dict) -> None:
+    data.setdefault("settings", {})
+    data["settings"].setdefault("primary_etf", "513390")
+    data["settings"].setdefault(
+        "primary_note",
+        "首页固定分析一只长期持仓；可在“我的ETF”页面改成你的实际持仓，本机浏览器会记住。",
+    )
+    data.setdefault("investment", {})
+    data["investment"].setdefault("daily_amount_yuan", 200)
+
+
 def main() -> None:
     data = load_local()
     validate(data)
+    ensure_defaults(data)
 
     fund_updates, fund_errors = update_fund_premiums(data)
+    history_updates, history_errors = merge_premium_history(data)
     risk_updates, risk_errors = update_risk(data)
 
     now = datetime.now(TZ)
     data["checked_at"] = now.strftime("%Y-%m-%d %H:%M:%S")
-    if fund_updates or risk_updates:
+    if fund_updates or risk_updates or history_updates:
         data["updated_at"] = data["checked_at"]
 
     premium_dates = [
@@ -285,16 +353,19 @@ def main() -> None:
     all_dates = [value for value in premium_dates + risk_dates if value]
     data["market_data_as_of"] = max(all_dates) if all_dates else data.get("market_data_as_of")
 
-    errors = fund_errors + risk_errors
+    errors = fund_errors + history_errors + risk_errors
     data["update_status"] = {
         "funds_updated": fund_updates,
+        "premium_history_updated": history_updates,
         "risk_series_updated": risk_updates,
         "errors": errors,
     }
+    data["source_note_short"] = "ETF溢价：HaoETF/证券之星；行情：Yahoo Finance（失败保留旧值）"
     data["source_note"] = (
         "ETF溢价优先读取HaoETF公开页面，失败时回退到证券之星折溢价历史；"
+        "溢价历史百分位通过证券之星历史样本与本地每日样本合并计算；"
         "VIX与纳指100使用Yahoo Finance公开行情序列。抓取失败会保留旧值，"
-        "不会用新时间覆盖成伪最新。综合评分=100-4×溢价率-10×综合费率。"
+        "不会用新时间覆盖成伪最新。综合评分仅用于市场总览横向比较。"
     )
 
     DATA_PATH.write_text(
@@ -302,8 +373,8 @@ def main() -> None:
         encoding="utf-8",
     )
     print(
-        f"ETF更新 {fund_updates}/12，风险序列更新 {risk_updates}/2，"
-        f"错误 {len(errors)} 个。"
+        f"ETF更新 {fund_updates}/12，溢价历史更新 {history_updates}/12，"
+        f"风险序列更新 {risk_updates}/2，错误 {len(errors)} 个。"
     )
 
 
