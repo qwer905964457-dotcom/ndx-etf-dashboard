@@ -1,0 +1,26 @@
+{
+  "updated_at": "2026-07-25 08:29:28",
+  "source_note": "已知数据保留原值；没有可靠同口径数据的字段为 null，页面显示暂无数据。",
+  "risk": {
+    "vix": 18.58,
+    "ndx": 28309.62,
+    "change20": null,
+    "vol20": null,
+    "vol60": null,
+    "pe": null
+  },
+  "funds": [
+    {"code":"159941","company":"广发","name":"纳指100 ETF","premium":8.67,"fee":null,"tracking":null,"score":null,"grade":null,"reason":null},
+    {"code":"159632","company":"华安","name":"纳指100 ETF","premium":6.48,"fee":null,"tracking":null,"score":null,"grade":null,"reason":null},
+    {"code":"513100","company":"国泰","name":"纳指100 ETF","premium":9.20,"fee":null,"tracking":null,"score":null,"grade":null,"reason":null},
+    {"code":"513300","company":"华夏","name":"纳指100 ETF","premium":7.05,"fee":null,"tracking":null,"score":null,"grade":null,"reason":null},
+    {"code":"513390","company":"博时","name":"纳指100 ETF","premium":6.50,"fee":null,"tracking":null,"score":null,"grade":null,"reason":null},
+    {"code":"513870","company":"富国","name":"纳指100 ETF","premium":null,"fee":null,"tracking":null,"score":null,"grade":null,"reason":null},
+    {"code":"159659","company":"招商","name":"纳指100 ETF","premium":6.84,"fee":null,"tracking":null,"score":null,"grade":null,"reason":null},
+    {"code":"513110","company":"华泰柏瑞","name":"纳指100 ETF","premium":6.50,"fee":null,"tracking":null,"score":null,"grade":null,"reason":null},
+    {"code":"159513","company":"大成","name":"纳指100 ETF","premium":null,"fee":null,"tracking":null,"score":null,"grade":null,"reason":null},
+    {"code":"159501","company":"嘉实","name":"纳指100 ETF","premium":null,"fee":null,"tracking":null,"score":null,"grade":null,"reason":null},
+    {"code":"159660","company":"汇添富","name":"纳指100 ETF","premium":6.68,"fee":null,"tracking":null,"score":null,"grade":null,"reason":null},
+    {"code":"159696","company":"易方达","name":"纳指100 ETF","premium":null,"fee":null,"tracking":null,"score":null,"grade":null,"reason":null}
+  ]
+}
