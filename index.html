@@ -3,93 +3,110 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#f7fbff">
-  <title>纳指100 ETF 作战室</title>
+  <meta name="theme-color" content="#fbfaf5">
+  <title>纳指100 ETF 监控</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="page">
-    <header class="hero">
-      <div>
-        <p class="eyebrow">NASDAQ-100 ETF NOTEBOOK</p>
-        <h1>纳指100 ETF 作战室</h1>
-        <p id="updatedAt" class="muted">数据更新时间：暂无数据</p>
-      </div>
-      <div class="sticker">📈</div>
-    </header>
+<main class="page">
+  <header class="hero">
+    <div class="mascot">🐧</div>
+    <div class="hero-copy">
+      <h1>纳指100 ETF 监控 <span>♡</span></h1>
+      <p>数据更新：<b id="updatedAt">暂无数据</b> <button id="refreshBtn">↻</button></p>
+      <p>数据来源：<b id="sourceNote">暂无数据</b></p>
+    </div>
+    <aside class="alert-box">
+      <div><b>🔔 预警状态</b><span id="alertState">观察中</span></div>
+      <p>溢价低于5%：<b id="underFiveCount">暂无数据</b></p>
+      <p>3%以内：<b id="underThreeCount">暂无数据</b></p>
+      <p>今日涨跌：<b id="todayMove">暂无数据</b></p>
+      <p>溢价变动：<b>暂无数据</b></p>
+    </aside>
+  </header>
 
-    <section>
-      <div class="section-title"><span>01</span><h2>今日决策</h2></div>
-      <div class="decision-grid">
-        <article class="card doodle">
-          <div class="card-label">综合推荐</div>
-          <h3 id="bestName">暂无数据</h3>
-          <div id="bestGrade" class="grade">暂无数据</div>
-          <dl class="facts">
-            <div><dt>当前溢价</dt><dd id="bestPremium">暂无数据</dd></div>
-            <div><dt>综合费率</dt><dd id="bestFee">暂无数据</dd></div>
-            <div><dt>跟踪情况</dt><dd id="bestTracking">暂无数据</dd></div>
-          </dl>
-          <p id="bestReason" class="note">暂无数据</p>
-        </article>
+  <nav class="tabs">
+    <button class="active" data-target="decision">今日决策</button>
+    <button data-target="all-etf">全部ETF</button>
+    <button data-target="long-term">长期比较</button>
+    <button data-target="risk">风险指标</button>
+    <button data-target="alerts">预警设置</button>
+  </nav>
 
-        <article class="card doodle accent-card">
-          <div class="card-label">最低溢价</div>
-          <h3 id="lowestName">暂无数据</h3>
-          <div id="lowestPremium" class="big-number">暂无数据</div>
-          <dl class="facts">
-            <div><dt>距离 5%</dt><dd id="toFive">暂无数据</dd></div>
-            <div><dt>距离 3%</dt><dd id="toThree">暂无数据</dd></div>
-            <div><dt>底仓区</dt><dd id="baseZone">暂无数据</dd></div>
-          </dl>
-        </article>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-title"><span>02</span><h2>买入建议</h2></div>
-      <article class="card buy-card">
-        <div id="buySignal" class="signal">暂无数据</div>
-        <div class="range-row">
-          <span>底仓</span><b>0–5%</b>
-          <span>轻仓</span><b>5–10%</b>
-          <span>分批</span><b>10–20%</b>
-          <span>深跌</span><b>15–25%</b>
+  <section id="decision" class="panel active">
+    <div class="two-col">
+      <article class="card pink-card">
+        <h2>🏆 1 综合推荐</h2>
+        <div class="fund-code" id="bestCode">暂无数据</div>
+        <div class="fund-name" id="bestName">暂无数据</div>
+        <span class="badge pink" id="bestGrade">暂无数据</span>
+        <div class="metrics four">
+          <div><span>溢价率</span><b id="bestPremium">暂无数据</b></div>
+          <div><span>费率(年)</span><b id="bestFee">暂无数据</b></div>
+          <div><span>近1年收益</span><b>暂无数据</b></div>
+          <div><span>跟踪偏离</span><b id="bestTracking">暂无数据</b></div>
         </div>
-        <p class="muted">区间用于分批纪律，不预测底部，也不代表自动满仓。</p>
+        <p class="reason"><b>推荐理由：</b><span id="bestReason">暂无数据</span></p>
       </article>
-    </section>
 
-    <section>
-      <div class="section-title"><span>03</span><h2>长期优选</h2></div>
-      <div id="topFunds" class="fund-grid"></div>
-    </section>
-
-    <section>
-      <div class="section-title"><span>04</span><h2>风险指标</h2></div>
-      <div id="riskGrid" class="risk-grid"></div>
-    </section>
-
-    <section>
-      <div class="section-title"><span>05</span><h2>全部 ETF</h2></div>
-      <div class="toolbar card">
-        <div class="segmented" id="filters">
-          <button class="active" data-filter="all">全部</button>
-          <button data-filter="under3">3%</button>
-          <button data-filter="under5">5%</button>
-          <button data-filter="wait">等待回落</button>
-          <button data-filter="weak">跟踪偏弱</button>
+      <article class="card blue-card">
+        <h2>🚩 2 最低溢价</h2>
+        <div class="fund-code" id="lowestCode">暂无数据</div>
+        <div class="fund-name" id="lowestName">暂无数据</div>
+        <span class="badge blue">溢价最低</span>
+        <div class="single-metric"><span>当前溢价率</span><b id="lowestPremium">暂无数据</b></div>
+        <div class="metrics two">
+          <div><span>距离3%目标线</span><b id="toThree">暂无数据</b></div>
+          <div><span>距离5%目标线</span><b id="toFive">暂无数据</b></div>
         </div>
-        <select id="sortSelect" aria-label="排序">
-          <option value="score">综合评分</option>
-          <option value="premium">溢价排序</option>
-        </select>
-      </div>
-      <div id="fundList" class="fund-list"></div>
-    </section>
+        <p class="zone" id="baseZone">暂无数据</p>
+      </article>
+    </div>
 
-    <footer>仅用于信息整理与比较，不构成投资建议。没有可靠数据时统一显示“暂无数据”。</footer>
-  </main>
-  <script src="app.js" defer></script>
+    <article class="card gold-card" id="long-term">
+      <h2>👑 3 长期优选 <small>（计划持有5年以上）</small></h2>
+      <div id="topFunds" class="top-funds"></div>
+    </article>
+
+    <div class="two-col">
+      <article class="card green-card">
+        <h2>💡 4 买入建议</h2>
+        <div class="buy-big" id="buySignal">暂无数据</div>
+        <p id="buyReason">根据当前最低溢价、VIX与纳指走势判断。</p>
+        <ul id="buyChecks"></ul>
+      </article>
+
+      <article class="card blue-card" id="risk">
+        <h2>⑤ 风险指标（纳指100）</h2>
+        <div id="riskGrid" class="risk-list"></div>
+      </article>
+    </div>
+
+    <div class="trend-grid">
+      <article class="trend-card"><h3>VIX走势 <span id="trendVix">暂无数据</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
+      <article class="trend-card"><h3>纳指100走势 <span id="trendNdx">暂无数据</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
+      <article class="trend-card"><h3>波动率（20日） <span id="trendVol">暂无数据</span></h3><div class="spark placeholder">趋势数据暂无</div></article>
+    </div>
+  </section>
+
+  <section id="all-etf" class="panel">
+    <div class="toolbar card">
+      <div class="filters">
+        <button class="active" data-filter="all">全部</button>
+        <button data-filter="under3">3%</button>
+        <button data-filter="under5">5%</button>
+        <button data-filter="wait">等待回落</button>
+        <button data-filter="weak">跟踪偏弱</button>
+      </div>
+      <select id="sortSelect"><option value="score">综合评分</option><option value="premium">溢价排序</option></select>
+    </div>
+    <div id="fundList" class="fund-list"></div>
+  </section>
+
+  <section id="alerts" class="panel"><article class="card"><h2>🔔 预警设置</h2><p>当前预警规则：溢价低于5%/3%，单日跌幅2%/3%/5%，NDX回撤8%/12%/15%/20%，VIX达到25/30/35。</p></article></section>
+
+  <footer>🐱 该页面仅用于信息整理和比较，不构成任何投资建议。 ♡</footer>
+</main>
+<script src="app.js" defer></script>
 </body>
 </html>
