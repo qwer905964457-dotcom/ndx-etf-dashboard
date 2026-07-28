@@ -5,7 +5,7 @@
     ['159513', '大成'], ['159501', '嘉实'], ['159660', '汇添富'], ['159696', '易方达']
   ].map(([code, company]) => ({code, company, name: `${company}纳指100ETF`}));
 
-  const ALERT_KEY = 'ndx-realtime-premium-alert-v2';
+  const ALERT_KEY = 'ndx-realtime-premium-alert-v3';
   const ENABLE_KEY = 'ndx-realtime-premium-notification-enabled-v1';
   const PRIMARY_KEY = 'ndx-primary-etf-code';
   const DEFAULT_PRIMARY = '513390';
@@ -14,11 +14,16 @@
   const LOW_THRESHOLDS = [3, 5];
   const FRESH_LIMIT_MS = 3.5 * 60 * 1000;
   const DELAY_LIMIT_MS = 15 * 60 * 1000;
+  const CALENDAR_URL = './market-calendar.json';
   const CORS_PROXIES = [
     url => url,
     url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     url => `https://api.codetabs.com/v1/proxy/?quest=${encodeURIComponent(url)}`
   ];
+
+  let MARKET_CALENDAR = null;
+  let CALENDAR_ERROR = null;
+  let CALENDAR_PROMISE = null;
 
   const ok = value => Number.isFinite(Number(value));
   const num = value => ok(value) ? Number(value) : null;
@@ -42,11 +47,57 @@
     };
   }
 
+  function isWeekend(weekday) {
+    return String(weekday || '').includes('六') || String(weekday || '').includes('日');
+  }
+
+  async function loadMarketCalendar() {
+    if (MARKET_CALENDAR || CALENDAR_ERROR) return MARKET_CALENDAR;
+    if (!CALENDAR_PROMISE) {
+      CALENDAR_PROMISE = fetch(`${CALENDAR_URL}?v=${Date.now()}`, {cache: 'no-store'})
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then(payload => {
+          const closed = new Map((payload.closed_dates || []).map(item => [item.date, item.reason || '休市']));
+          const open = new Set(payload.open_dates || []);
+          MARKET_CALENDAR = {...payload, closedMap: closed, openSet: open};
+          return MARKET_CALENDAR;
+        })
+        .catch(error => {
+          CALENDAR_ERROR = error;
+          console.warn('market calendar load failed', error);
+          return null;
+        });
+    }
+    return CALENDAR_PROMISE;
+  }
+
+  function marketDayInfo(date = new Date()) {
+    const p = cnParts(date);
+    if (MARKET_CALENDAR?.openSet?.has(p.date)) return {date: p.date, isTradingDay: true, reason: '交易日历指定开市', calendarLoaded: true};
+    if (MARKET_CALENDAR?.closedMap?.has(p.date)) return {date: p.date, isTradingDay: false, reason: MARKET_CALENDAR.closedMap.get(p.date), calendarLoaded: true};
+    if (isWeekend(p.weekday)) return {date: p.date, isTradingDay: false, reason: '周末休市', calendarLoaded: !!MARKET_CALENDAR};
+    return {date: p.date, isTradingDay: true, reason: MARKET_CALENDAR ? '交易日' : '交易日历未加载，按工作日兜底', calendarLoaded: !!MARKET_CALENDAR};
+  }
+
   function isTradingSession() {
     const p = cnParts();
-    if (p.weekday.includes('六') || p.weekday.includes('日')) return false;
+    const day = marketDayInfo();
+    if (!day.isTradingDay) return false;
     const m = p.hour * 60 + p.minute;
     return (m >= 9 * 60 + 30 && m <= 11 * 60 + 30) || (m >= 13 * 60 && m <= 15 * 60);
+  }
+
+  function tradingStatusText() {
+    const p = cnParts();
+    const day = marketDayInfo();
+    const calendarText = MARKET_CALENDAR ? `交易日历：${MARKET_CALENDAR.source || '已加载'}` : (CALENDAR_ERROR ? '交易日历加载失败，按工作日兜底' : '交易日历加载中');
+    if (!day.isTradingDay) return `A股休市（${day.reason}），不触发盘中提醒｜${calendarText}`;
+    return isTradingSession()
+      ? `A股交易中，约60秒刷新｜${calendarText}`
+      : `A股交易日但非连续竞价时段，约5分钟刷新；不触发盘中提醒｜${calendarText}`;
   }
 
   function secid(code) {
@@ -85,9 +136,8 @@
     if (!normalized) return null;
     const [date, time] = normalized.split(' ');
     if (!time) return {date, timestamp: null, hasMinute: false};
-    const [y, m, d] = date.split('-').map(Number);
-    const [hh, mm, ss = 0] = time.split(':').map(Number);
-    return {date, timestamp: new Date(y, m - 1, d, hh, mm, ss).getTime(), hasMinute: true};
+    const timestamp = new Date(`${date}T${time}+08:00`).getTime();
+    return {date, timestamp, hasMinute: Number.isFinite(timestamp)};
   }
 
   function classifyFreshness(sourceTime) {
@@ -159,7 +209,8 @@
       const price = num(row.f2);
       const change = num(row.f3);
       const prevClose = num(row.f18);
-      const quoteTime = ok(row.f124) ? cnParts(new Date(Number(row.f124) * 1000)).date + ' ' + cnParts(new Date(Number(row.f124) * 1000)).time : null;
+      const quoteDate = ok(row.f124) ? new Date(Number(row.f124) * 1000) : null;
+      const quoteTime = quoteDate ? `${cnParts(quoteDate).date} ${cnParts(quoteDate).time}` : null;
       if (row.f12) map.set(String(row.f12), {price, change, prevClose, quoteName: row.f14, quoteTime});
     });
     return map;
@@ -228,7 +279,7 @@
       </div>
       <div id="realtimeVisualAlert" class="visual-alert empty">低于5%会提示“观察区”，低于3%会提示“底仓区”。提醒只用于场内额外买入，不影响场外每日300元。</div>
       <div class="realtime-table" id="realtimePremiumTable"></div>
-      <p class="tiny">说明：优先使用“实时价÷IOPV”口径；如果公开接口暂未给出稳定IOPV，则降级展示公开页面溢价。只有交易时段且时间足够新的数据才会触发提醒；下单前仍以券商APP实时IOPV/溢价为最终核对。</p>
+      <p class="tiny">说明：优先使用“实时价÷IOPV”口径；如果公开接口暂未给出稳定IOPV，则降级展示公开页面溢价。只有交易日、交易时段且时间足够新的数据才会触发提醒；下单前仍以券商APP实时IOPV/溢价为最终核对。</p>
     `;
     const home = document.getElementById('home');
     const warning = document.querySelector('#home .warning-card');
@@ -283,10 +334,9 @@
     const status = document.getElementById('realtimeStatus');
     if (!table || !status) return;
     const now = cnParts();
-    const trading = isTradingSession();
     const valid = rows.filter(row => ok(row.premium)).sort((a, b) => a.premium - b.premium);
     const alertable = valid.filter(row => row.canAlert).length;
-    status.textContent = `${forced ? '手动刷新' : '自动刷新'}：${now.date} ${now.time}｜${trading ? 'A股交易中，约60秒刷新' : '非A股交易时段，约5分钟刷新；不触发盘中提醒'}｜成功 ${valid.length}/12，可提醒 ${alertable}/12，失败 ${errors.length}/12`;
+    status.textContent = `${forced ? '手动刷新' : '自动刷新'}：${now.date} ${now.time}｜${tradingStatusText()}｜成功 ${valid.length}/12，可提醒 ${alertable}/12，失败 ${errors.length}/12`;
 
     const cells = valid.map(row => {
       const [label, cls] = stateLabel(row.premium);
@@ -319,7 +369,7 @@
     const [label] = stateLabel(row.premium);
     if (note) note.textContent = `盘中${label}｜${row.freshLabel || '未校验'}｜${row.sourceLabel || row.source}`;
     const source = document.getElementById('sourceNote');
-    if (source) source.textContent = '日频数据 + 盘中公开溢价源';
+    if (source) source.textContent = '日频数据 + 盘中公开溢价源 + A股交易日历';
   }
 
   function markPrimaryRealtimeMissing(code) {
@@ -362,8 +412,8 @@
       } else {
         visual.classList.add('empty');
         visual.textContent = isTradingSession()
-          ? '暂未触发低溢价提醒。只有交易时段、时间足够新、首次进入5%/3%才提醒。'
-          : '当前非A股交易时段：显示数据但不触发盘中低溢价提醒。';
+          ? '暂未触发低溢价提醒。只有交易日、交易时段、时间足够新、首次进入5%/3%才提醒。'
+          : `${tradingStatusText()}。显示数据但不触发盘中低溢价提醒。`;
       }
     }
 
@@ -375,6 +425,7 @@
 
   async function refreshRealtime(forced = false) {
     ensurePanel();
+    await loadMarketCalendar();
     const table = document.getElementById('realtimePremiumTable');
     if (table) table.innerHTML = '<div class="empty">正在读取盘中溢价…</div>';
     const quoteMap = await fetchEastmoneyQuotes().catch(() => new Map());
