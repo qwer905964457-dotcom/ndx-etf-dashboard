@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "尚未运行",
+  "updated_at": "尚未运行",
+  "market_status": {
+    "date": null,
+    "time": null,
+    "is_trading_day": null,
+    "is_trading_session": false,
+    "reason": "等待GitHub Actions首次生成",
+    "calendar_source": "market-calendar.json"
+  },
+  "source_note": "等待 update_realtime.py 首次生成。字段无法可靠取得时保持暂无数据，不用旧值冒充实时。",
+  "refresh_policy": "GitHub Actions在A股交易时段附近约每5分钟尝试更新；GitHub调度可能延迟。网页每60秒读取本JSON。",
+  "summary": {
+    "valid_count": 0,
+    "alertable_count": 0,
+    "lowest_code": null,
+    "lowest_premium": null,
+    "low_premium_count": 0,
+    "high_premium_count": 0,
+    "recommendation": "场外300元/交易日照常；场内额外仓只在低溢价可靠触发后再评估。"
+  },
+  "funds": [
+    {"code":"159941","company":"广发","name":"广发纳指100ETF","price":null,"change_pct":null,"iopv":null,"premium":null,"data_time":null,"source":"暂无数据","source_url":null,"source_label":"暂无数据","quality":"missing","freshness":"missing","can_alert":false,"fresh_label":"等待首次生成，不提醒","status":"暂无数据","error":null},
+    {"code":"159632","company":"华安","name":"华安纳指100ETF","price":null,"change_pct":null,"iopv":null,"premium":null,"data_time":null,"source":"暂无数据","source_url":null,"source_label":"暂无数据","quality":"missing","freshness":"missing","can_alert":false,"fresh_label":"等待首次生成，不提醒","status":"暂无数据","error":null},
+    {"code":"513100","company":"国泰","name":"国泰纳指100ETF","price":null,"change_pct":null,"iopv":null,"premium":null,"data_time":null,"source":"暂无数据","source_url":null,"source_label":"暂无数据","quality":"missing","freshness":"missing","can_alert":false,"fresh_label":"等待首次生成，不提醒","status":"暂无数据","error":null},
+    {"code":"513300","company":"华夏","name":"华夏纳指100ETF","price":null,"change_pct":null,"iopv":null,"premium":null,"data_time":null,"source":"暂无数据","source_url":null,"source_label":"暂无数据","quality":"missing","freshness":"missing","can_alert":false,"fresh_label":"等待首次生成，不提醒","status":"暂无数据","error":null},
+    {"code":"513390","company":"博时","name":"博时纳指100ETF","price":null,"change_pct":null,"iopv":null,"premium":null,"data_time":null,"source":"暂无数据","source_url":null,"source_label":"暂无数据","quality":"missing","freshness":"missing","can_alert":false,"fresh_label":"等待首次生成，不提醒","status":"暂无数据","error":null},
+    {"code":"513870","company":"富国","name":"富国纳指100ETF","price":null,"change_pct":null,"iopv":null,"premium":null,"data_time":null,"source":"暂无数据","source_url":null,"source_label":"暂无数据","quality":"missing","freshness":"missing","can_alert":false,"fresh_label":"等待首次生成，不提醒","status":"暂无数据","error":null},
+    {"code":"159659","company":"招商","name":"招商纳指100ETF","price":null,"change_pct":null,"iopv":null,"premium":null,"data_time":null,"source":"暂无数据","source_url":null,"source_label":"暂无数据","quality":"missing","freshness":"missing","can_alert":false,"fresh_label":"等待首次生成，不提醒","status":"暂无数据","error":null},
+    {"code":"513110","company":"华泰柏瑞","name":"华泰柏瑞纳指100ETF","price":null,"change_pct":null,"iopv":null,"premium":null,"data_time":null,"source":"暂无数据","source_url":null,"source_label":"暂无数据","quality":"missing","freshness":"missing","can_alert":false,"fresh_label":"等待首次生成，不提醒","status":"暂无数据","error":null},
+    {"code":"159513","company":"大成","name":"大成纳指100ETF","price":null,"change_pct":null,"iopv":null,"premium":null,"data_time":null,"source":"暂无数据","source_url":null,"source_label":"暂无数据","quality":"missing","freshness":"missing","can_alert":false,"fresh_label":"等待首次生成，不提醒","status":"暂无数据","error":null},
+    {"code":"159501","company":"嘉实","name":"嘉实纳指100ETF","price":null,"change_pct":null,"iopv":null,"premium":null,"data_time":null,"source":"暂无数据","source_url":null,"source_label":"暂无数据","quality":"missing","freshness":"missing","can_alert":false,"fresh_label":"等待首次生成，不提醒","status":"暂无数据","error":null},
+    {"code":"159660","company":"汇添富","name":"汇添富纳指100ETF","price":null,"change_pct":null,"iopv":null,"premium":null,"data_time":null,"source":"暂无数据","source_url":null,"source_label":"暂无数据","quality":"missing","freshness":"missing","can_alert":false,"fresh_label":"等待首次生成，不提醒","status":"暂无数据","error":null},
+    {"code":"159696","company":"易方达","name":"易方达纳指100ETF","price":null,"change_pct":null,"iopv":null,"premium":null,"data_time":null,"source":"暂无数据","source_url":null,"source_label":"暂无数据","quality":"missing","freshness":"missing","can_alert":false,"fresh_label":"等待首次生成，不提醒","status":"暂无数据","error":null}
+  ],
+  "errors": []
+}
