@@ -5,13 +5,15 @@
     ['159513', '大成'], ['159501', '嘉实'], ['159660', '汇添富'], ['159696', '易方达']
   ].map(([code, company]) => ({code, company, name: `${company}纳指100ETF`}));
 
-  const ALERT_KEY = 'ndx-realtime-premium-alert-v1';
+  const ALERT_KEY = 'ndx-realtime-premium-alert-v2';
   const ENABLE_KEY = 'ndx-realtime-premium-notification-enabled-v1';
   const PRIMARY_KEY = 'ndx-primary-etf-code';
   const DEFAULT_PRIMARY = '513390';
   const REFRESH_OPEN = 60 * 1000;
   const REFRESH_CLOSED = 5 * 60 * 1000;
   const LOW_THRESHOLDS = [3, 5];
+  const FRESH_LIMIT_MS = 3.5 * 60 * 1000;
+  const DELAY_LIMIT_MS = 15 * 60 * 1000;
   const CORS_PROXIES = [
     url => url,
     url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
@@ -24,12 +26,12 @@
   const fmtPct = value => ok(value) ? `${fmt(value)}%` : '暂无';
   const pad = value => String(value).padStart(2, '0');
 
-  function cnParts() {
+  function cnParts(date = new Date()) {
     const parts = new Intl.DateTimeFormat('zh-CN', {
       timeZone: 'Asia/Shanghai', hour12: false,
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit', weekday: 'short'
-    }).formatToParts(new Date()).reduce((acc, part) => {
+    }).formatToParts(date).reduce((acc, part) => {
       acc[part.type] = part.value;
       return acc;
     }, {});
@@ -52,11 +54,8 @@
   }
 
   function loadAlertState() {
-    try {
-      return JSON.parse(localStorage.getItem(ALERT_KEY)) || {lastPremium: {}, armed: {}};
-    } catch {
-      return {lastPremium: {}, armed: {}};
-    }
+    try { return JSON.parse(localStorage.getItem(ALERT_KEY)) || {lastPremium: {}, armed: {}}; }
+    catch { return {lastPremium: {}, armed: {}}; }
   }
 
   function saveAlertState(state) {
@@ -78,7 +77,30 @@
     const value = String(text || '').trim();
     const full = value.match(/(20\d{2})[-/.年](\d{1,2})[-/.月](\d{1,2})(?:\s+(\d{1,2}:\d{1,2}(?::\d{1,2})?))?/);
     if (!full) return null;
-    return `${full[1]}-${pad(full[2])}-${pad(full[3])}${full[4] ? ` ${full[4]}` : ''}`;
+    return `${full[1]}-${pad(full[2])}-${pad(full[3])}${full[4] ? ` ${full[4].length === 5 ? `${full[4]}:00` : full[4]}` : ''}`;
+  }
+
+  function parseCnDateTime(value) {
+    const normalized = normalizeDate(value);
+    if (!normalized) return null;
+    const [date, time] = normalized.split(' ');
+    if (!time) return {date, timestamp: null, hasMinute: false};
+    const [y, m, d] = date.split('-').map(Number);
+    const [hh, mm, ss = 0] = time.split(':').map(Number);
+    return {date, timestamp: new Date(y, m - 1, d, hh, mm, ss).getTime(), hasMinute: true};
+  }
+
+  function classifyFreshness(sourceTime) {
+    const trading = isTradingSession();
+    const now = cnParts();
+    const parsed = parseCnDateTime(sourceTime);
+    if (!parsed) return {freshness: 'unknown', canAlert: false, label: '无时间戳，不提醒'};
+    if (parsed.date !== now.date) return {freshness: 'stale', canAlert: false, label: '非今日数据，不提醒'};
+    if (!parsed.hasMinute) return {freshness: 'today', canAlert: false, label: '今日无分钟级时间，只展示'};
+    const age = Date.now() - parsed.timestamp;
+    if (age <= FRESH_LIMIT_MS) return {freshness: 'realtime', canAlert: trading, label: trading ? '分钟级实时，可提醒' : '非交易时段，只展示'};
+    if (age <= DELAY_LIMIT_MS) return {freshness: 'delayed', canAlert: false, label: '延迟数据，只展示'};
+    return {freshness: 'stale', canAlert: false, label: '时间过旧，不提醒'};
   }
 
   function parseHaoEtf(code, html) {
@@ -95,18 +117,18 @@
       const candidates = [];
       if (cells[3] !== undefined) {
         const value = parsePercent(cells[3]);
-        if (ok(value) && Math.abs(value) < 60) candidates.push({premium: value, sourceTime});
+        if (ok(value) && Math.abs(value) < 60) candidates.push({publishedPremium: value, sourceTime});
       }
       if (cells[5] !== undefined) {
         const value = parsePercent(cells[5]);
         const cellTime = normalizeDate(cells[6]) || sourceTime;
-        if (ok(value) && Math.abs(value) < 60) candidates.push({premium: value, sourceTime: cellTime});
+        if (ok(value) && Math.abs(value) < 60) candidates.push({publishedPremium: value, sourceTime: cellTime});
       }
       if (candidates.length) return candidates[0];
     }
 
     const loose = textOnly.match(new RegExp(`${code}[\\s\\S]{0,120}?(-?\\d+(?:\\.\\d+)?)\\s*%`));
-    if (loose) return {premium: Number(loose[1]), sourceTime};
+    if (loose) return {publishedPremium: Number(loose[1]), sourceTime};
     throw new Error('未解析到溢价');
   }
 
@@ -119,16 +141,14 @@
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const html = await res.text();
         const parsed = parseHaoEtf(code, html);
-        return {...parsed, source: wrap(url) === url ? 'HaoETF直连' : 'HaoETF实时页', sourceUrl: url};
-      } catch (error) {
-        lastError = error;
-      }
+        return {...parsed, source: wrap(url) === url ? 'HaoETF直连' : 'HaoETF公开页', sourceUrl: url};
+      } catch (error) { lastError = error; }
     }
     throw lastError || new Error('HaoETF获取失败');
   }
 
   async function fetchEastmoneyQuotes() {
-    const fields = 'f12,f14,f2,f3,f4,f18,f15,f16,f17,f152';
+    const fields = 'f12,f14,f2,f3,f4,f18,f15,f16,f17,f124,f152';
     const url = `https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&invt=2&fields=${fields}&secids=${ETF_LIST.map(x => secid(x.code)).join(',')}`;
     const res = await timeoutFetch(url, {cache: 'no-store'}, 9000);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -139,9 +159,35 @@
       const price = num(row.f2);
       const change = num(row.f3);
       const prevClose = num(row.f18);
-      if (row.f12) map.set(String(row.f12), {price, change, prevClose, quoteName: row.f14});
+      const quoteTime = ok(row.f124) ? cnParts(new Date(Number(row.f124) * 1000)).date + ' ' + cnParts(new Date(Number(row.f124) * 1000)).time : null;
+      if (row.f12) map.set(String(row.f12), {price, change, prevClose, quoteName: row.f14, quoteTime});
     });
     return map;
+  }
+
+  function mergePremium(item, published, quote) {
+    const price = num(quote.price);
+    const iopv = num(quote.iopv);
+    if (ok(price) && ok(iopv) && iopv > 0) {
+      const premium = (price / iopv - 1) * 100;
+      const sourceTime = quote.quoteTime || published.sourceTime;
+      return {
+        ...item, ...quote,
+        premium, iopv, sourceTime,
+        source: '实时价÷IOPV计算',
+        sourceLabel: '实时价÷IOPV',
+        quality: 'calculated-iopv'
+      };
+    }
+    return {
+      ...item, ...quote,
+      premium: published.publishedPremium,
+      publishedPremium: published.publishedPremium,
+      sourceTime: published.sourceTime,
+      source: published.source,
+      sourceLabel: '公开页面溢价',
+      quality: 'public-page'
+    };
   }
 
   function ensureStyles() {
@@ -153,10 +199,10 @@
       .realtime-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
       .realtime-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.realtime-actions button{border:2px solid var(--ink);border-radius:12px;background:#dcf5e8;padding:9px 12px;font-weight:900;color:var(--ink)}
       .realtime-status{color:var(--muted);line-height:1.65;margin:8px 0 0}.realtime-table{display:grid;gap:8px;margin-top:12px}
-      .realtime-row{display:grid;grid-template-columns:1.1fr .8fr .8fr .8fr 1.2fr;gap:8px;align-items:center;padding:10px;border-radius:12px;background:#fff;border:1px solid #d8eadf}
-      .realtime-row.header{background:#e8f6ef;font-weight:950}.realtime-row b{font-size:18px}.premium-low{color:#2f8a62}.premium-mid{color:#a06b00}.premium-high{color:#bd4c62}.tiny{font-size:12px;color:var(--muted)}
+      .realtime-row{display:grid;grid-template-columns:1.1fr .85fr .7fr .7fr 1.3fr;gap:8px;align-items:center;padding:10px;border-radius:12px;background:#fff;border:1px solid #d8eadf}
+      .realtime-row.header{background:#e8f6ef;font-weight:950}.realtime-row b{font-size:18px}.premium-low{color:#2f8a62}.premium-mid{color:#a06b00}.premium-high{color:#bd4c62}.tiny{font-size:12px;color:var(--muted);line-height:1.45}.fresh-ok{color:#2f8a62}.fresh-warn{color:#a06b00}.fresh-bad{color:#bd4c62}
       .visual-alert{margin-top:12px;padding:12px;border-radius:14px;border:2px solid #2f8a62;background:#effbf4;line-height:1.7;font-weight:850}.visual-alert.empty{border-color:#d7e2ec;background:#fff;color:var(--muted);font-weight:700}
-      @media(max-width:760px){.realtime-row{grid-template-columns:1fr 1fr}.realtime-row.header{display:none}.realtime-row span::before{display:block;font-size:11px;color:var(--muted);font-weight:700}.realtime-row span:nth-child(2)::before{content:'实时溢价'}.realtime-row span:nth-child(3)::before{content:'最新价'}.realtime-row span:nth-child(4)::before{content:'日涨跌'}.realtime-row span:nth-child(5)::before{content:'数据时间'}}
+      @media(max-width:760px){.realtime-row{grid-template-columns:1fr 1fr}.realtime-row.header{display:none}.realtime-row span::before{display:block;font-size:11px;color:var(--muted);font-weight:700}.realtime-row span:nth-child(2)::before{content:'溢价口径'}.realtime-row span:nth-child(3)::before{content:'最新价'}.realtime-row span:nth-child(4)::before{content:'日涨跌'}.realtime-row span:nth-child(5)::before{content:'可靠性'}}
     `;
     document.head.appendChild(style);
   }
@@ -171,18 +217,18 @@
     panel.innerHTML = `
       <div class="realtime-head">
         <div>
-          <div class="section-label">盘中实时溢价</div>
+          <div class="section-label">场内额外仓监控</div>
           <h2>低溢价主动提醒</h2>
-          <p class="realtime-status" id="realtimeStatus">准备读取实时溢价…</p>
+          <p class="realtime-status" id="realtimeStatus">准备读取盘中溢价…</p>
         </div>
         <div class="realtime-actions">
           <button id="realtimeRefreshBtn">立即刷新</button>
           <button id="enablePremiumNotifyBtn">开启提醒</button>
         </div>
       </div>
-      <div id="realtimeVisualAlert" class="visual-alert empty">低于5%会提示“观察区”，低于3%会提示“底仓区”。同一状态不会重复轰炸。</div>
+      <div id="realtimeVisualAlert" class="visual-alert empty">低于5%会提示“观察区”，低于3%会提示“底仓区”。提醒只用于场内额外买入，不影响场外每日300元。</div>
       <div class="realtime-table" id="realtimePremiumTable"></div>
-      <p class="tiny">说明：页面会尽量读取公开实时溢价源；如果源不可用或休市，不触发提醒。下单前仍以券商APP实时IOPV/溢价为最终核对。</p>
+      <p class="tiny">说明：优先使用“实时价÷IOPV”口径；如果公开接口暂未给出稳定IOPV，则降级展示公开页面溢价。只有交易时段且时间足够新的数据才会触发提醒；下单前仍以券商APP实时IOPV/溢价为最终核对。</p>
     `;
     const home = document.getElementById('home');
     const warning = document.querySelector('#home .warning-card');
@@ -226,6 +272,11 @@
     if (premium <= 9) return ['偏高', 'premium-high'];
     return ['高溢价', 'premium-high'];
   }
+  function freshnessClass(freshness) {
+    if (freshness === 'realtime') return 'fresh-ok';
+    if (freshness === 'delayed' || freshness === 'today') return 'fresh-warn';
+    return 'fresh-bad';
+  }
 
   function renderRealtime(rows, errors, forced) {
     const table = document.getElementById('realtimePremiumTable');
@@ -234,40 +285,49 @@
     const now = cnParts();
     const trading = isTradingSession();
     const valid = rows.filter(row => ok(row.premium)).sort((a, b) => a.premium - b.premium);
-    status.textContent = `${forced ? '手动刷新' : '自动刷新'}：${now.date} ${now.time}｜${trading ? 'A股交易中，约60秒刷新' : '非A股交易时段，约5分钟刷新；不触发盘中提醒'}｜成功 ${valid.length}/12，失败 ${errors.length}/12`;
+    const alertable = valid.filter(row => row.canAlert).length;
+    status.textContent = `${forced ? '手动刷新' : '自动刷新'}：${now.date} ${now.time}｜${trading ? 'A股交易中，约60秒刷新' : '非A股交易时段，约5分钟刷新；不触发盘中提醒'}｜成功 ${valid.length}/12，可提醒 ${alertable}/12，失败 ${errors.length}/12`;
 
     const cells = valid.map(row => {
       const [label, cls] = stateLabel(row.premium);
+      const freshCls = freshnessClass(row.freshness);
       return `<div class="realtime-row">
         <span><strong>${row.code} ${row.company}</strong><div class="tiny">${row.name}</div></span>
-        <span><b class="${cls}">${fmtPct(row.premium)}</b><div class="tiny">${label}</div></span>
-        <span>${ok(row.price) ? fmt(row.price, 3) : '暂无'}</span>
+        <span><b class="${cls}">${fmtPct(row.premium)}</b><div class="tiny">${label}｜${row.sourceLabel || row.source}</div></span>
+        <span>${ok(row.price) ? fmt(row.price, 3) : '暂无'}${ok(row.iopv) ? `<div class="tiny">IOPV ${fmt(row.iopv, 4)}</div>` : ''}</span>
         <span class="${num(row.change) < 0 ? 'premium-high' : 'premium-low'}">${ok(row.change) ? fmtPct(row.change) : '暂无'}</span>
-        <span><b class="tiny">${row.sourceTime || '未知'}</b><div class="tiny">${row.source}</div></span>
+        <span><b class="tiny ${freshCls}">${row.freshLabel || '未校验'}</b><div class="tiny">${row.sourceTime || '未知时间'}</div></span>
       </div>`;
     }).join('');
-    table.innerHTML = `<div class="realtime-row header"><span>ETF</span><span>实时溢价</span><span>最新价</span><span>日涨跌</span><span>数据时间/来源</span></div>${cells || '<div class="empty">实时溢价暂不可用，不触发提醒。</div>'}`;
+    table.innerHTML = `<div class="realtime-row header"><span>ETF</span><span>溢价口径</span><span>最新价</span><span>日涨跌</span><span>可靠性</span></div>${cells || '<div class="empty">盘中溢价暂不可用，不触发提醒。</div>'}`;
 
-    const primary = localStorage.getItem(PRIMARY_KEY) || DEFAULT_PRIMARY;
-    const primaryRow = valid.find(row => row.code === primary) || valid[0];
+    if (window.NDXDashboard?.setRealtimeRows) window.NDXDashboard.setRealtimeRows(rows);
+
+    const primary = localStorage.getItem(PRIMARY_KEY) || window.NDXDashboard?.getPrimaryCode?.() || DEFAULT_PRIMARY;
+    const primaryRow = valid.find(row => row.code === primary);
     if (primaryRow) updatePrimaryDisplay(primaryRow);
+    else markPrimaryRealtimeMissing(primary);
   }
 
   function updatePrimaryDisplay(row) {
-    const text = `${fmtPct(row.premium)}（实时）`;
+    const text = `${fmtPct(row.premium)}（盘中）`;
     ['heroPremium', 'holdingPremium', 'myPremium', 'premiumCardValue'].forEach(id => {
       const node = document.getElementById(id);
       if (node) node.textContent = text;
     });
     const note = document.getElementById('premiumCardNote');
     const [label] = stateLabel(row.premium);
-    if (note) note.textContent = `实时${label}｜${row.sourceTime || '时间未知'}｜${row.source}`;
+    if (note) note.textContent = `盘中${label}｜${row.freshLabel || '未校验'}｜${row.sourceLabel || row.source}`;
     const source = document.getElementById('sourceNote');
-    if (source) source.textContent = '日频数据 + 盘中实时溢价';
+    if (source) source.textContent = '日频数据 + 盘中公开溢价源';
+  }
+
+  function markPrimaryRealtimeMissing(code) {
+    const note = document.getElementById('premiumCardNote');
+    if (note) note.textContent = `${code} 盘中溢价获取失败，不用其他ETF替代。`;
   }
 
   function notifyLowPremium(rows) {
-    const trading = isTradingSession();
     const state = loadAlertState();
     state.lastPremium ||= {};
     state.armed ||= {};
@@ -277,12 +337,12 @@
     rows.filter(row => ok(row.premium)).forEach(row => {
       const previous = state.lastPremium[row.code];
       const target = row.premium <= 3 ? 3 : row.premium <= 5 ? 5 : null;
-      if (target && trading) {
+      if (target && row.canAlert) {
         const key = `${row.code}-${target}`;
         const crossed = !ok(previous) || Number(previous) > target;
         if (crossed && state.armed[key] !== true) {
           const label = target === 3 ? '底仓区' : '观察区';
-          const msg = `${label}：${row.code} ${row.company} 实时溢价 ${fmtPct(row.premium)}，数据时间 ${row.sourceTime || '未知'}，来源 ${row.source}`;
+          const msg = `${label}：${row.code} ${row.company} 盘中溢价 ${fmtPct(row.premium)}，${row.freshLabel || ''}，来源 ${row.sourceLabel || row.source}`;
           messages.push(msg);
           state.armed[key] = true;
           if (target === 3) state.armed[`${row.code}-5`] = true;
@@ -301,7 +361,9 @@
         visual.innerHTML = messages.map(x => `<div>🔔 ${x}</div>`).join('');
       } else {
         visual.classList.add('empty');
-        visual.textContent = trading ? '暂未触发低溢价提醒。低于5%/3%会首次提示，不重复轰炸。' : '当前非A股交易时段：显示数据但不触发盘中低溢价提醒。';
+        visual.textContent = isTradingSession()
+          ? '暂未触发低溢价提醒。只有交易时段、时间足够新、首次进入5%/3%才提醒。'
+          : '当前非A股交易时段：显示数据但不触发盘中低溢价提醒。';
       }
     }
 
@@ -314,12 +376,14 @@
   async function refreshRealtime(forced = false) {
     ensurePanel();
     const table = document.getElementById('realtimePremiumTable');
-    if (table) table.innerHTML = '<div class="empty">正在读取实时溢价…</div>';
+    if (table) table.innerHTML = '<div class="empty">正在读取盘中溢价…</div>';
     const quoteMap = await fetchEastmoneyQuotes().catch(() => new Map());
     const results = await Promise.allSettled(ETF_LIST.map(async item => {
-      const premium = await fetchHaoPremium(item.code);
+      const published = await fetchHaoPremium(item.code);
       const quote = quoteMap.get(item.code) || {};
-      return {...item, ...premium, ...quote};
+      const merged = mergePremium(item, published, quote);
+      const fresh = classifyFreshness(merged.sourceTime || quote.quoteTime);
+      return {...merged, ...fresh, freshLabel: fresh.label};
     }));
     const rows = results.filter(x => x.status === 'fulfilled').map(x => x.value);
     const errors = results.filter(x => x.status === 'rejected').map(x => x.reason?.message || String(x.reason));
@@ -331,9 +395,6 @@
     refreshRealtime(false).finally(() => setTimeout(loop, isTradingSession() ? REFRESH_OPEN : REFRESH_CLOSED));
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', loop);
-  } else {
-    loop();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loop);
+  else loop();
 })();
