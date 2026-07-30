@@ -11,7 +11,14 @@
   let activeFilter = 'all';
   let lastPayload = null;
 
-  const ok = value => Number.isFinite(Number(value));
+  const ok = value => {
+    if (value === null || value === undefined) return false;
+    if (typeof value === 'string') {
+      const text = value.trim();
+      if (!text || ['-', '--', '暂无数据', 'null', 'None', 'NaN'].includes(text)) return false;
+    }
+    return Number.isFinite(Number(value));
+  };
   const num = value => ok(value) ? Number(value) : null;
   const fmt = (value, digits = 2) => ok(value) ? Number(value).toFixed(digits).replace(/\.00$/, '') : '暂无数据';
   const fmtPct = value => ok(value) ? `${fmt(value)}%` : '暂无数据';
@@ -205,7 +212,7 @@
         <span><strong>${row.code} ${row.company}</strong><div class="tiny">${row.name || '纳指100ETF'}</div></span>
         <span><b class="${cls}">${fmtPct(row.premium)}</b><div class="tiny">${label}｜${row.sourceLabel || row.source || '暂无来源'}</div></span>
         <span>${ok(row.price) ? fmt(row.price, 3) : '暂无数据'}${ok(row.iopv) ? `<div class="tiny">IOPV ${fmt(row.iopv, 4)}</div>` : '<div class="tiny">IOPV 暂无数据</div>'}</span>
-        <span class="${num(row.change) < 0 ? 'premium-high' : 'premium-low'}">${ok(row.change) ? fmtPct(row.change) : '暂无数据'}</span>
+        <span class="${ok(row.change) && num(row.change) < 0 ? 'premium-high' : 'premium-low'}">${ok(row.change) ? fmtPct(row.change) : '暂无数据'}</span>
         <span><b class="tiny ${freshCls}">${row.freshLabel || '未校验'}</b><div class="tiny">${row.sourceTime || '未知时间'}</div></span>
       </div>`;
     }).join('');
