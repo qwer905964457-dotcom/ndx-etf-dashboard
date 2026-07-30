@@ -13,7 +13,14 @@ let REALTIME_ROWS = [];
 
 const el = id => document.getElementById(id);
 const set = (id, value) => { const node = el(id); if (node) node.textContent = value; };
-const ok = value => Number.isFinite(Number(value));
+const ok = value => {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') {
+    const text = value.trim();
+    if (!text || ['-', '--', '暂无数据', 'null', 'None', 'NaN'].includes(text)) return false;
+  }
+  return Number.isFinite(Number(value));
+};
 const num = value => ok(value) ? Number(value) : null;
 const fmt = (value, suffix = '', digits = 2) => ok(value) ? `${Number(value).toFixed(digits).replace(/\.00$/, '')}${suffix}` : NA;
 const fmtPct = value => fmt(value, '%');
@@ -93,7 +100,12 @@ function drawdownInfo(){
     const high = Math.max(...values);
     return {value: (current / high - 1) * 100, high, source: `近${values.length}个交易日`};
   }
-  return {value: null, high: null, source: '等待行情源恢复'};
+  if (ok(r.drawdown_from_high)) {
+    return {value: num(r.drawdown_from_high), high: null, source: r.ndx_source ? `${r.ndx_source}阶段数据` : '阶段数据'};
+  }
+  const riskErrors = DATA?.update_status?.errors || [];
+  const hasRiskError = Array.isArray(riskErrors) && riskErrors.some(x => String(x).includes('^NDX'));
+  return {value: null, high: null, source: hasRiskError ? '纳指历史行情源失败，等待下次自动更新' : '等待纳指历史行情源'};
 }
 function classifyVix(vix){
   if (!ok(vix)) return ['未知', 'VIX数据暂不可用'];
@@ -232,16 +244,16 @@ function renderMyEtf(){
 function renderSpark(id, rows, suffix=''){
   const box = el(id);
   if (!box) return;
-  if (!Array.isArray(rows) || rows.length < 2) {
+  const values = Array.isArray(rows) ? rows.map(x=>x.value).filter(ok) : [];
+  if (!Array.isArray(rows) || rows.length < 2 || values.length < 2) {
     box.textContent = rows?.length ? `已有 ${rows.length} 个样本，继续累积后显示趋势` : '历史数据累积中';
     box.classList.add('placeholder');
     return;
   }
-  const values = rows.map(x=>x.value).filter(ok);
   const min = Math.min(...values);
   const max = Math.max(...values);
   const span = max - min || 1;
-  const recent = rows.slice(-60);
+  const recent = rows.filter(item => ok(item.value)).slice(-60);
   box.classList.remove('placeholder');
   box.innerHTML = `<div class="bars">${recent.map(item => {
     const h = 14 + ((item.value - min) / span) * 72;
@@ -266,7 +278,7 @@ function sortedFunds(kind){
 }
 function renderRankLists(){
   const lowest = [...funds()].filter(f=>ok(displayPremiumFor(f).value)).sort((a,b)=>Number(displayPremiumFor(a).value)-Number(displayPremiumFor(b).value)).slice(0,5);
-  const lowFee = [...funds()].filter(f=>ok(f.fee)).sort((a,b)=>Number(a.fee)-Number(b.fee) || Number(displayPremiumFor(a).value ?? 99)-Number(displayPremiumFor(b).value ?? 99)).slice(0,5);
+  const lowFee = [...funds()].filter(f=>ok(f.fee)).sort((a,b)=>Number(a.fee)-Number(b.fee) || (num(displayPremiumFor(a).value) ?? 99)-(num(displayPremiumFor(b).value) ?? 99)).slice(0,5);
   const row = (f,i,field) => `<div class="rank-row"><span>${i+1}</span><b>${f.code} ${f.company}</b><em>${field === 'fee' ? fmtPct(f.fee) : fmtPct(displayPremiumFor(f).value)}</em></div>`;
   const lbox = el('lowestList'); if (lbox) lbox.innerHTML = lowest.map((f,i)=>row(f,i,'premium')).join('') || NA;
   const fbox = el('feeList'); if (fbox) fbox.innerHTML = lowFee.map((f,i)=>row(f,i,'fee')).join('') || NA;
@@ -282,7 +294,7 @@ function renderFunds(){
     const pct = stats.pct180 ?? stats.pct30;
     const isPrimary = String(f.code) === selected;
     const premium = displayPremiumFor(f);
-    const sourceTag = premium.live ? '盘中' : '日频';
+    const sourceTag = ok(premium.value) ? (premium.live ? '盘中' : '日频') : '暂无';
     return `<article class="fund-item ${isPrimary?'primary':''}">
       <div class="fund-head">
         <div><strong>${f.code} ${f.company}</strong><div>${f.name || '纳指100 ETF'} ${isPrimary ? '<span class="tiny-badge">首页主角</span>' : ''}</div></div>
@@ -335,7 +347,8 @@ function renderRisk(){
   set('trendVix', fmt(r.vix));
   set('trendNdx', fmt(r.ndx));
   set('trendVol', fmtPct(r.vol20));
-  set('valuationSummary', `当前VIX状态：${vixState}。${vixNote}。估值PE/PB如果抓取不到，会保持“暂无数据”，不硬填。`);
+  const riskSource = [r.ndx_source, r.vix_source].filter(Boolean).join(' / ') || '等待行情源';
+  set('valuationSummary', `当前VIX状态：${vixState}。${vixNote}。行情源：${riskSource}；PE/PB如果抓取不到，会保持“暂无数据”，不硬填。`);
   renderSpark('vixSpark', Array.isArray(DATA?.history?.vix) ? DATA.history.vix : [], '');
   renderSpark('ndxSpark', Array.isArray(DATA?.history?.ndx) ? DATA.history.ndx : [], '');
 }
@@ -345,7 +358,7 @@ function renderDataCenter(){
   const sampleTotal = Object.values(historyStore).reduce((sum, rows)=>sum + (Array.isArray(rows) ? rows.length : 0), 0);
   const liveCount = REALTIME_ROWS.filter(row => ok(row.premium)).length;
   const rows = [
-    ['页面版本', 'v3.0 双轨执行模式'],
+    ['页面版本', 'v3.1 数据空值修正版'],
     ['ETF数量', `${funds().length}只`],
     ['溢价历史样本', `${sampleTotal}条`],
     ['基金日频更新', `${status.funds_updated ?? 0}/12`],
