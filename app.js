@@ -14,12 +14,11 @@ let REALTIME_ROWS = [];
 const el = id => document.getElementById(id);
 const set = (id, value) => { const node = el(id); if (node) node.textContent = value; };
 const ok = value => {
-  if (value === null || value === undefined) return false;
-  if (typeof value === 'string') {
-    const text = value.trim();
-    if (!text || ['-', '--', '暂无数据', 'null', 'None', 'NaN'].includes(text)) return false;
-  }
-  return Number.isFinite(Number(value));
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (typeof value !== 'string') return false;
+  const text = value.trim();
+  if (!text || ['-', '--', '暂无数据', 'null', 'none', 'nan', 'n/a'].includes(text.toLowerCase())) return false;
+  return Number.isFinite(Number(text));
 };
 const num = value => ok(value) ? Number(value) : null;
 const fmt = (value, suffix = '', digits = 2) => ok(value) ? `${Number(value).toFixed(digits).replace(/\.00$/, '')}${suffix}` : NA;
@@ -36,11 +35,10 @@ function primaryCode(){
   const saved = localStorage.getItem(HOLDING_KEY);
   if (saved && byCode(saved)) return saved;
   const configured = DATA?.settings?.primary_etf;
-  if (configured && byCode(configured)) return String(configured);
-  if (byCode(DEFAULT_PRIMARY)) return DEFAULT_PRIMARY;
-  return bestByScore()?.code;
+  if (configured) return String(configured);
+  return DEFAULT_PRIMARY;
 }
-function primaryFund(){ return byCode(primaryCode()) || bestByScore(); }
+function primaryFund(){ return byCode(primaryCode()) || null; }
 function realtimeByCode(code){ return REALTIME_ROWS.find(row => String(row.code) === String(code)); }
 function hasReliableRealtime(row){ return row && ok(row.premium) && ['realtime','delayed','today'].includes(row.freshness); }
 function displayPremiumFor(fund){
