@@ -7,7 +7,7 @@ import math
 import re
 import statistics
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import quote
 from zoneinfo import ZoneInfo
@@ -307,17 +307,95 @@ def stooq_series(symbols: list[str]) -> tuple[list[str], list[float]]:
     raise RuntimeError("Stooq失败: " + "; ".join(errors))
 
 
+def parse_market_date(value: str | None) -> str | None:
+    if not value:
+        return None
+    text = str(value).strip()
+    for fmt in ("%m/%d/%Y", "%Y-%m-%d", "%b %d, %Y"):
+        try:
+            return datetime.strptime(text, fmt).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+    return normalize_date(text)
+
+
+def nasdaq_index_series(symbol: str) -> tuple[list[str], list[float]]:
+    end = datetime.now(TZ).date()
+    start = end - timedelta(days=260)
+    url = (
+        f"https://api.nasdaq.com/api/quote/{symbol}/historical"
+        f"?assetclass=index&fromdate={start:%Y-%m-%d}&todate={end:%Y-%m-%d}&limit=9999"
+    )
+    headers = {
+        **HEADERS,
+        "Accept": "application/json, text/plain, */*",
+        "Origin": "https://www.nasdaq.com",
+        "Referer": f"https://www.nasdaq.com/market-activity/index/{symbol.lower()}/historical",
+    }
+    response = SESSION.get(url, headers=headers, timeout=25)
+    response.raise_for_status()
+    payload = response.json()
+    rows = payload.get("data", {}).get("tradesTable", {}).get("rows") or []
+    parsed: list[tuple[str, float]] = []
+    for row in rows:
+        date = parse_market_date(row.get("date"))
+        close = parse_number(row.get("close"))
+        if date and close is not None:
+            parsed.append((date, float(close)))
+    parsed = sorted(set(parsed))
+    if len(parsed) < 2:
+        raise RuntimeError(f"Nasdaq API {symbol} 点数不足")
+    dates, values = zip(*parsed[-160:])
+    return list(dates), list(values)
+
+
+def cboe_vix_series() -> tuple[list[str], list[float]]:
+    url = "https://cdn.cboe.com/api/global/us_indices/daily_prices/VIX_History.csv"
+    response = get(url, timeout=25)
+    reader = csv.DictReader(io.StringIO(response.text))
+    parsed: list[tuple[str, float]] = []
+    for row in reader:
+        date = parse_market_date(row.get("DATE") or row.get("Date"))
+        close = parse_number(row.get("CLOSE") or row.get("Close"))
+        if date and close is not None:
+            parsed.append((date, float(close)))
+    parsed = sorted(set(parsed))
+    if len(parsed) < 2:
+        raise RuntimeError("CBOE VIX CSV 点数不足")
+    dates, values = zip(*parsed[-160:])
+    return list(dates), list(values)
+
+
 def series_with_fallback(key: str) -> tuple[list[str], list[float], str]:
     yahoo_symbol = YAHOO_SYMBOLS[key]
+    errors: list[str] = []
     try:
         dates, values = yahoo_series(yahoo_symbol)
         return dates, values, f"Yahoo Finance {yahoo_symbol}"
-    except Exception as yahoo_error:
+    except Exception as exc:
+        errors.append(f"Yahoo: {type(exc).__name__}: {exc}")
+
+    if key == "ndx":
         try:
-            dates, values = stooq_series(STOOQ_SYMBOLS[key])
-            return dates, values, f"Stooq {STOOQ_SYMBOLS[key][0]}（Yahoo失败：{type(yahoo_error).__name__}）"
-        except Exception as stooq_error:
-            raise RuntimeError(f"{yahoo_error}; {stooq_error}") from stooq_error
+            dates, values = nasdaq_index_series("NDX")
+            return dates, values, "Nasdaq官方历史接口 NDX"
+        except Exception as exc:
+            errors.append(f"Nasdaq: {type(exc).__name__}: {exc}")
+
+    if key == "vix":
+        try:
+            dates, values = cboe_vix_series()
+            return dates, values, "CBOE VIX历史CSV"
+        except Exception as exc:
+            errors.append(f"CBOE: {type(exc).__name__}: {exc}")
+
+    try:
+        dates, values = stooq_series(STOOQ_SYMBOLS[key])
+        return dates, values, f"Stooq {STOOQ_SYMBOLS[key][0]}"
+    except Exception as exc:
+        errors.append(f"Stooq: {type(exc).__name__}: {exc}")
+
+    raise RuntimeError("; ".join(errors))
 
 
 def annualized_volatility(values: list[float], window: int) -> float | None:
@@ -413,11 +491,11 @@ def main() -> None:
         "risk_series_updated": risk_updates,
         "errors": errors,
     }
-    data["source_note_short"] = "ETF溢价：HaoETF/证券之星；行情：Yahoo Finance，失败回退Stooq"
+    data["source_note_short"] = "ETF溢价：HaoETF/证券之星；行情：Yahoo，失败回退Nasdaq/CBOE/Stooq"
     data["source_note"] = (
         "ETF溢价优先读取HaoETF公开页面，失败时回退到证券之星折溢价历史；"
         "溢价历史百分位通过证券之星历史样本与本地每日样本合并计算；"
-        "VIX与纳指100优先使用Yahoo Finance公开行情序列，失败时回退Stooq CSV。"
+        "VIX与纳指100优先使用Yahoo Finance公开行情序列，失败时回退Nasdaq官方历史接口、CBOE VIX CSV和Stooq CSV。"
         "抓取失败会保留旧值，不会用新时间覆盖成伪最新。综合评分仅用于市场总览横向比较。"
     )
 
