@@ -21,6 +21,7 @@ REQUIRED_CODES = {
     "159941", "159632", "513100", "513300", "513390", "513870",
     "159659", "513110", "159513", "159501", "159660", "159696",
 }
+MISSING_TOKENS = {"", "-", "--", "暂无数据", "null", "none", "nan", "n/a"}
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
@@ -57,17 +58,40 @@ def get(url: str, *, timeout: int = 25) -> requests.Response:
 
 
 def parse_number(text: str | None) -> float | None:
-    if text is None:
+    if isinstance(text, bool) or text is None:
         return None
-    match = re.search(r"-?\d+(?:\.\d+)?", str(text).replace(",", ""))
-    return round(float(match.group(0)), 4) if match else None
+    value = str(text).replace(",", "").strip()
+    if value.lower() in MISSING_TOKENS:
+        return None
+    match = re.search(r"-?\d+(?:\.\d+)?", value)
+    if not match:
+        return None
+    number = float(match.group(0))
+    return round(number, 4) if math.isfinite(number) else None
 
 
 def parse_percent(text: str | None) -> float | None:
-    if text is None:
+    if isinstance(text, bool) or text is None:
         return None
-    match = re.search(r"(-?\d+(?:\.\d+)?)\s*%", str(text).replace(",", ""))
-    return round(float(match.group(1)), 2) if match else None
+    value = str(text).replace(",", "").strip()
+    if value.lower() in MISSING_TOKENS:
+        return None
+    match = re.search(r"(-?\d+(?:\.\d+)?)\s*%", value)
+    if not match:
+        return None
+    number = float(match.group(1))
+    return round(number, 2) if math.isfinite(number) else None
+
+
+def valid_number(value) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+def sanitize_fund_numbers(fund: dict) -> None:
+    for field in ("premium", "fee"):
+        value = fund.get(field)
+        if not valid_number(value):
+            fund[field] = None
 
 
 def normalize_date(text: str | None) -> str | None:
@@ -191,7 +215,7 @@ def grade_for(score: int) -> str:
 def refresh_score(fund: dict) -> None:
     premium = fund.get("premium")
     fee = fund.get("fee")
-    if not isinstance(premium, (int, float)) or not isinstance(fee, (int, float)):
+    if not valid_number(premium) or not valid_number(fee):
         fund["score"] = None
         fund["grade"] = "数据待补"
         return
@@ -208,6 +232,7 @@ def update_fund_premiums(data: dict) -> tuple[int, list[str]]:
     updated = 0
     errors: list[str] = []
     for fund in data["funds"]:
+        sanitize_fund_numbers(fund)
         code = str(fund["code"])
         try:
             incoming = fetch_premium(code)
@@ -236,7 +261,7 @@ def merge_premium_history(data: dict, *, limit: int = 260) -> tuple[int, list[st
         for item in store.get(code, []):
             date = item.get("date") or item.get("premium_date")
             premium = item.get("premium", item.get("value"))
-            if date and isinstance(premium, (int, float)):
+            if date and valid_number(premium):
                 by_date[date] = round(float(premium), 2)
 
         try:
@@ -248,7 +273,7 @@ def merge_premium_history(data: dict, *, limit: int = 260) -> tuple[int, list[st
 
         current_date = fund.get("premium_date")
         current_premium = fund.get("premium")
-        if current_date and isinstance(current_premium, (int, float)):
+        if current_date and valid_number(current_premium):
             by_date[current_date] = round(float(current_premium), 2)
 
         store[code] = [{"date": d, "premium": p} for d, p in sorted(by_date.items())[-limit:]]

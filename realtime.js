@@ -12,12 +12,11 @@
   let lastPayload = null;
 
   const ok = value => {
-    if (value === null || value === undefined) return false;
-    if (typeof value === 'string') {
-      const text = value.trim();
-      if (!text || ['-', '--', '暂无数据', 'null', 'None', 'NaN'].includes(text)) return false;
-    }
-    return Number.isFinite(Number(value));
+    if (typeof value === 'number') return Number.isFinite(value);
+    if (typeof value !== 'string') return false;
+    const text = value.trim();
+    if (!text || ['-', '--', '暂无数据', 'null', 'none', 'nan', 'n/a'].includes(text.toLowerCase())) return false;
+    return Number.isFinite(Number(text));
   };
   const num = value => ok(value) ? Number(value) : null;
   const fmt = (value, digits = 2) => ok(value) ? Number(value).toFixed(digits).replace(/\.00$/, '') : '暂无数据';
@@ -41,12 +40,19 @@
   function normalizeRows(payload) {
     return (Array.isArray(payload?.funds) ? payload.funds : []).map(row => ({
       ...row,
+      price: num(row.price),
+      iopv: num(row.iopv),
+      premium: num(row.premium),
       sourceTime: row.data_time,
       sourceLabel: row.source_label || row.source,
       freshLabel: row.fresh_label,
-      change: row.change_pct,
-      canAlert: row.can_alert === true,
+      change: num(row.change_pct),
+      canAlert: row.can_alert === true && ok(row.premium),
     }));
+  }
+
+  function primaryCode() {
+    return localStorage.getItem(PRIMARY_KEY) || window.NDXDashboard?.getPrimaryCode?.() || DEFAULT_PRIMARY;
   }
 
   function loadAlertState() {
@@ -223,15 +229,16 @@
   }
 
   function updatePrimaryDisplay(rows) {
-    const primary = localStorage.getItem(PRIMARY_KEY) || window.NDXDashboard?.getPrimaryCode?.() || DEFAULT_PRIMARY;
+    const primary = primaryCode();
     const row = rows.find(item => String(item.code) === String(primary));
     const source = el('sourceNote');
     if (source) source.textContent = '日频data.json + 盘中realtime.json';
     const updated = el('updatedAt');
     if (updated && lastPayload?.updated_at) updated.textContent = lastPayload.updated_at;
-    if (!row || !ok(row.premium)) {
+    const displayable = row && ok(row.premium) && ['realtime', 'delayed', 'today'].includes(row.freshness);
+    if (!displayable) {
       const note = el('premiumCardNote');
-      if (note) note.textContent = `${primary} 盘中溢价暂无数据，不用其他ETF替代。`;
+      if (note) note.textContent = `${primary} 盘中溢价暂无可靠数据，保留它自己的日频溢价，不用其他ETF替代。`;
       return;
     }
     const text = `${fmtPct(row.premium)}（${row.sourceLabel || '盘中'}）`;
@@ -246,12 +253,14 @@
 
   function notifyLowPremium(payload) {
     const rows = normalizeRows(payload);
+    const primary = primaryCode();
+    const row = rows.find(item => String(item.code) === String(primary));
     const state = loadAlertState();
     state.lastPremium ||= {};
     state.armed ||= {};
     const messages = [];
 
-    rows.filter(row => ok(row.premium)).forEach(row => {
+    [row].filter(item => item && ok(item.premium)).forEach(row => {
       const previous = state.lastPremium[row.code];
       const target = row.premium <= 3 ? 3 : row.premium <= 5 ? 5 : null;
       if (target && row.canAlert) {
@@ -278,8 +287,10 @@
         visual.innerHTML = messages.map(x => `<div>🔔 ${x}</div>`).join('');
       } else {
         visual.classList.add('empty');
-        visual.textContent = payload?.market_status?.is_trading_session
-          ? '暂未触发低溢价提醒。只有realtime.json显示数据新鲜、首次进入5%/3%才提醒。'
+        visual.textContent = !row || !ok(row.premium)
+          ? `${primary} 溢价暂无数据，不使用其他ETF替代，也不触发提醒。`
+          : payload?.market_status?.is_trading_session
+          ? `暂未触发 ${primary} 低溢价提醒。只有它自己的实时溢价数据新鲜、首次进入5%/3%才提醒。`
           : `${tradingText(payload)}。显示数据但不触发盘中低溢价提醒。`;
       }
     }

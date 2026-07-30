@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import re
 import time
 from datetime import datetime
@@ -30,6 +31,7 @@ SESSION.headers.update(HEADERS)
 
 FRESH_MINUTES = 8
 DELAY_MINUTES = 30
+MISSING_TOKENS = {"", "-", "--", "暂无数据", "null", "none", "nan", "n/a"}
 
 
 def now_cn() -> datetime:
@@ -37,18 +39,33 @@ def now_cn() -> datetime:
 
 
 def parse_num(value) -> float | None:
-    if value is None:
+    if isinstance(value, bool) or value is None:
         return None
     text = str(value).replace(",", "").strip()
-    if text in {"", "-", "--", "None", "null"}:
+    if text.lower() in MISSING_TOKENS:
         return None
     match = re.search(r"-?\d+(?:\.\d+)?", text)
-    return round(float(match.group(0)), 4) if match else None
+    if not match:
+        return None
+    number = float(match.group(0))
+    return round(number, 4) if math.isfinite(number) else None
 
 
-def parse_pct(text: str) -> float | None:
-    match = re.search(r"(-?\d+(?:\.\d+)?)\s*%", str(text).replace(",", ""))
-    return round(float(match.group(1)), 2) if match else None
+def parse_pct(value) -> float | None:
+    if isinstance(value, bool) or value is None:
+        return None
+    text = str(value).replace(",", "").strip()
+    if text.lower() in MISSING_TOKENS:
+        return None
+    match = re.search(r"(-?\d+(?:\.\d+)?)\s*%", text)
+    if not match:
+        return None
+    number = float(match.group(1))
+    return round(number, 2) if math.isfinite(number) else None
+
+
+def valid_number(value) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
 
 
 def normalize_datetime(text: str | None) -> str | None:
@@ -207,7 +224,7 @@ def classify_time(data_time: str | None, status: dict, quality: str) -> tuple[st
 
 
 def zone_label(premium: float | None) -> str:
-    if premium is None:
+    if not valid_number(premium):
         return "暂无数据"
     if premium <= 3:
         return "底仓区"
@@ -218,6 +235,20 @@ def zone_label(premium: float | None) -> str:
     if premium <= 9:
         return "偏高"
     return "高溢价"
+
+
+def apply_signal_status(item: dict, status: dict) -> None:
+    item["price"] = parse_num(item.get("price"))
+    item["iopv"] = parse_num(item.get("iopv"))
+    item["premium"] = parse_num(item.get("premium"))
+    freshness, can_alert, fresh_label = classify_time(item.get("data_time"), status, item["quality"])
+    if not valid_number(item["premium"]):
+        can_alert = False
+        fresh_label = "溢价暂无数据，不提醒"
+    item["freshness"] = freshness
+    item["can_alert"] = can_alert
+    item["fresh_label"] = fresh_label
+    item["status"] = zone_label(item["premium"])
 
 
 def main() -> None:
@@ -256,8 +287,8 @@ def main() -> None:
         }
         quote = quote_map.get(code) or {}
         item.update({
-            "price": quote.get("price"),
-            "change_pct": quote.get("change_pct"),
+            "price": parse_num(quote.get("price")),
+            "change_pct": parse_num(quote.get("change_pct")),
             "quote_time": quote.get("quote_time"),
             "quote_source": quote.get("quote_source"),
         })
@@ -276,15 +307,11 @@ def main() -> None:
             errors.append(msg)
             item["error"] = msg
 
-        freshness, can_alert, fresh_label = classify_time(item.get("data_time"), status, item["quality"])
-        item["freshness"] = freshness
-        item["can_alert"] = can_alert
-        item["fresh_label"] = fresh_label
-        item["status"] = zone_label(item.get("premium"))
+        apply_signal_status(item, status)
         funds.append(item)
         time.sleep(0.15)
 
-    valid = [f for f in funds if isinstance(f.get("premium"), (int, float))]
+    valid = [f for f in funds if valid_number(f.get("premium"))]
     lowest = min(valid, key=lambda f: f["premium"], default=None)
     high = [f for f in valid if f["premium"] >= 9]
     low = [f for f in valid if f["premium"] <= 5]
