@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import csv
+import io
 import json
 import math
 import re
@@ -22,12 +24,18 @@ REQUIRED_CODES = {
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-        "Chrome/126.0 Safari/537.36 ndx-etf-dashboard/2.2"
+        "Chrome/126.0 Safari/537.36 ndx-etf-dashboard/3.1"
     ),
     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.7",
 }
 SESSION = requests.Session()
 SESSION.headers.update(HEADERS)
+
+YAHOO_SYMBOLS = {"vix": "^VIX", "ndx": "^NDX"}
+STOOQ_SYMBOLS = {
+    "vix": ["^vix", "vix.us"],
+    "ndx": ["^ndx", "ndx.us", "nasdaq100.us"],
+}
 
 
 def load_local() -> dict:
@@ -48,22 +56,28 @@ def get(url: str, *, timeout: int = 25) -> requests.Response:
     return response
 
 
-def parse_number(text: str) -> float | None:
-    match = re.search(r"-?\d+(?:\.\d+)?", text.replace(",", ""))
-    return round(float(match.group(0)), 2) if match else None
+def parse_number(text: str | None) -> float | None:
+    if text is None:
+        return None
+    match = re.search(r"-?\d+(?:\.\d+)?", str(text).replace(",", ""))
+    return round(float(match.group(0)), 4) if match else None
 
 
-def parse_percent(text: str) -> float | None:
-    match = re.search(r"(-?\d+(?:\.\d+)?)\s*%", text.replace(",", ""))
+def parse_percent(text: str | None) -> float | None:
+    if text is None:
+        return None
+    match = re.search(r"(-?\d+(?:\.\d+)?)\s*%", str(text).replace(",", ""))
     return round(float(match.group(1)), 2) if match else None
 
 
-def normalize_date(text: str) -> str | None:
-    text = text.strip()
-    full = re.search(r"(20\d{2})[-/.年](\d{1,2})[-/.月](\d{1,2})", text)
+def normalize_date(text: str | None) -> str | None:
+    if not text:
+        return None
+    value = str(text).strip()
+    full = re.search(r"(20\d{2})[-/.年](\d{1,2})[-/.月](\d{1,2})", value)
     if full:
         return f"{int(full.group(1)):04d}-{int(full.group(2)):02d}-{int(full.group(3)):02d}"
-    short = re.search(r"(?<!\d)(\d{1,2})[-/.](\d{1,2})(?!\d)", text)
+    short = re.search(r"(?<!\d)(\d{1,2})[-/.](\d{1,2})(?!\d)", value)
     if short:
         now = datetime.now(TZ)
         return f"{now.year:04d}-{int(short.group(1)):02d}-{int(short.group(2)):02d}"
@@ -93,18 +107,18 @@ def fetch_haoetf(code: str) -> dict | None:
         candidates: list[tuple[float, str]] = []
         if len(cells) > 3:
             value = parse_percent(cells[3])
-            if value is not None:
+            if value is not None and abs(value) < 60:
                 candidates.append((value, page_date))
         if len(cells) > 5:
             value = parse_percent(cells[5])
-            if value is not None:
+            if value is not None and abs(value) < 60:
                 item_date = normalize_date(cells[6]) if len(cells) > 6 else None
                 candidates.append((value, item_date or page_date))
 
         if not candidates:
             for cell in cells[:7]:
                 value = parse_percent(cell)
-                if value is not None:
+                if value is not None and abs(value) < 60:
                     candidates.append((value, page_date))
                     break
 
@@ -117,6 +131,25 @@ def fetch_haoetf(code: str) -> dict | None:
                 "source_url": url,
             }
     return None
+
+
+def fetch_stockstar_history(code: str, *, limit: int = 220) -> list[dict]:
+    url = f"https://fund.stockstar.com/funds/f10/fundzyj_{code}.html"
+    response = get(url)
+    response.encoding = response.apparent_encoding or response.encoding
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    by_date: dict[str, float] = {}
+    for row in soup.find_all("tr"):
+        cells = [cell.get_text(" ", strip=True) for cell in row.find_all(["td", "th"])]
+        if len(cells) < 3 or not re.fullmatch(r"\d+", cells[0]):
+            continue
+        premium_date = normalize_date(cells[1])
+        premium = parse_number(cells[2])
+        if premium_date and premium is not None:
+            by_date[premium_date] = round(float(premium), 2)
+
+    return [{"date": d, "premium": p} for d, p in sorted(by_date.items())][-limit:]
 
 
 def fetch_stockstar(code: str) -> dict | None:
@@ -132,31 +165,6 @@ def fetch_stockstar(code: str) -> dict | None:
     }
 
 
-def fetch_stockstar_history(code: str, *, limit: int = 220) -> list[dict]:
-    """读取证券之星折溢价历史。返回按日期升序排列的 {date, premium}。"""
-    url = f"https://fund.stockstar.com/funds/f10/fundzyj_{code}.html"
-    response = get(url)
-    response.encoding = response.apparent_encoding or response.encoding
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    by_date: dict[str, float] = {}
-    for row in soup.find_all("tr"):
-        cells = [cell.get_text(" ", strip=True) for cell in row.find_all(["td", "th"])]
-        if len(cells) < 3 or not re.fullmatch(r"\d+", cells[0]):
-            continue
-        premium_date = normalize_date(cells[1])
-        # 该页面表头写“折溢价率(%)”，数据单元格本身通常只有“7.87”，不含%号。
-        premium = parse_number(cells[2])
-        if premium_date and premium is not None:
-            by_date[premium_date] = premium
-
-    rows = [
-        {"date": date, "premium": premium}
-        for date, premium in sorted(by_date.items())
-    ]
-    return rows[-limit:]
-
-
 def fetch_premium(code: str) -> dict:
     errors: list[str] = []
     for name, fetcher in (("HaoETF", fetch_haoetf), ("证券之星", fetch_stockstar)):
@@ -166,7 +174,7 @@ def fetch_premium(code: str) -> dict:
                 return result
             errors.append(f"{name}: 页面未解析到数据")
         except Exception as exc:
-            errors.append(f"{name}: {type(exc).__name__}")
+            errors.append(f"{name}: {type(exc).__name__}: {exc}")
     raise RuntimeError("; ".join(errors))
 
 
@@ -216,7 +224,6 @@ def update_fund_premiums(data: dict) -> tuple[int, list[str]]:
 
 
 def merge_premium_history(data: dict, *, limit: int = 260) -> tuple[int, list[str]]:
-    """为“溢价历史百分位”累积样本，不影响当天溢价展示。"""
     history = data.setdefault("history", {})
     store = history.setdefault("premium_by_code", {})
     updated_codes = 0
@@ -239,17 +246,12 @@ def merge_premium_history(data: dict, *, limit: int = 260) -> tuple[int, list[st
         except Exception as exc:
             errors.append(f"{code} history: {type(exc).__name__}: {exc}")
 
-        # 同一天 HaoETF 与证券之星可能口径略有差异；首页决策使用当前 fund.premium，
-        # 所以历史库里当天值也优先采用当前展示值，避免百分位和页面溢价打架。
         current_date = fund.get("premium_date")
         current_premium = fund.get("premium")
         if current_date and isinstance(current_premium, (int, float)):
             by_date[current_date] = round(float(current_premium), 2)
 
-        store[code] = [
-            {"date": date, "premium": premium}
-            for date, premium in sorted(by_date.items())[-limit:]
-        ]
+        store[code] = [{"date": d, "premium": p} for d, p in sorted(by_date.items())[-limit:]]
         time.sleep(0.15)
 
     return updated_codes, errors
@@ -257,23 +259,65 @@ def merge_premium_history(data: dict, *, limit: int = 260) -> tuple[int, list[st
 
 def yahoo_series(symbol: str) -> tuple[list[str], list[float]]:
     encoded = quote(symbol, safe="")
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{encoded}?range=6mo&interval=1d"
-    response = get(url, timeout=20)
-    payload = response.json()
-    result = payload["chart"]["result"][0]
-    timestamps = result["timestamp"]
-    closes = result["indicators"]["quote"][0]["close"]
+    last_error: Exception | None = None
+    for host in ("query1.finance.yahoo.com", "query2.finance.yahoo.com"):
+        url = f"https://{host}/v8/finance/chart/{encoded}?range=6mo&interval=1d"
+        try:
+            response = get(url, timeout=20)
+            payload = response.json()
+            result = payload["chart"]["result"][0]
+            timestamps = result.get("timestamp") or []
+            closes = result.get("indicators", {}).get("quote", [{}])[0].get("close") or []
+            dates: list[str] = []
+            values: list[float] = []
+            for timestamp, close in zip(timestamps, closes):
+                if close is None:
+                    continue
+                dates.append(datetime.fromtimestamp(timestamp, TZ).strftime("%Y-%m-%d"))
+                values.append(float(close))
+            if len(values) >= 2:
+                return dates, values
+            raise ValueError(f"{symbol} 行情点数不足")
+        except Exception as exc:
+            last_error = exc
+    raise RuntimeError(f"Yahoo失败: {type(last_error).__name__}: {last_error}")
 
-    dates: list[str] = []
-    values: list[float] = []
-    for timestamp, close in zip(timestamps, closes):
-        if close is None:
-            continue
-        dates.append(datetime.fromtimestamp(timestamp, TZ).strftime("%Y-%m-%d"))
-        values.append(float(close))
-    if len(values) < 2:
-        raise ValueError(f"{symbol} 行情点数不足")
-    return dates, values
+
+def stooq_series(symbols: list[str]) -> tuple[list[str], list[float]]:
+    errors: list[str] = []
+    for symbol in symbols:
+        url = f"https://stooq.com/q/d/l/?s={quote(symbol.lower(), safe='^.')}&i=d"
+        try:
+            response = get(url, timeout=20)
+            text = response.text.strip()
+            reader = csv.DictReader(io.StringIO(text))
+            dates: list[str] = []
+            values: list[float] = []
+            for row in reader:
+                date = row.get("Date") or row.get("date")
+                close = parse_number(row.get("Close") or row.get("close"))
+                if date and close is not None:
+                    dates.append(date)
+                    values.append(float(close))
+            if len(values) >= 2:
+                return dates[-160:], values[-160:]
+            errors.append(f"{symbol}: 点数不足")
+        except Exception as exc:
+            errors.append(f"{symbol}: {type(exc).__name__}: {exc}")
+    raise RuntimeError("Stooq失败: " + "; ".join(errors))
+
+
+def series_with_fallback(key: str) -> tuple[list[str], list[float], str]:
+    yahoo_symbol = YAHOO_SYMBOLS[key]
+    try:
+        dates, values = yahoo_series(yahoo_symbol)
+        return dates, values, f"Yahoo Finance {yahoo_symbol}"
+    except Exception as yahoo_error:
+        try:
+            dates, values = stooq_series(STOOQ_SYMBOLS[key])
+            return dates, values, f"Stooq {STOOQ_SYMBOLS[key][0]}（Yahoo失败：{type(yahoo_error).__name__}）"
+        except Exception as stooq_error:
+            raise RuntimeError(f"{yahoo_error}; {stooq_error}") from stooq_error
 
 
 def annualized_volatility(values: list[float], window: int) -> float | None:
@@ -295,26 +339,27 @@ def update_risk(data: dict) -> tuple[int, list[str]]:
     updates = 0
     errors: list[str] = []
 
-    for key, symbol in (("vix", "^VIX"), ("ndx", "^NDX")):
+    for key in ("vix", "ndx"):
+        public_symbol = YAHOO_SYMBOLS[key]
         try:
-            dates, values = yahoo_series(symbol)
+            dates, values, source = series_with_fallback(key)
             risk[key] = round(values[-1], 2)
             risk[f"{key}_date"] = dates[-1]
+            risk[f"{key}_source"] = source
             history[key] = [
                 {"date": date, "value": round(value, 2)}
                 for date, value in zip(dates[-120:], values[-120:])
             ]
             if key == "ndx":
                 risk["change1"] = round((values[-1] / values[-2] - 1) * 100, 2)
-                if len(values) >= 21:
-                    risk["change20"] = round((values[-1] / values[-21] - 1) * 100, 2)
+                risk["change20"] = round((values[-1] / values[-21] - 1) * 100, 2) if len(values) >= 21 else None
                 risk["vol20"] = annualized_volatility(values, 20)
                 risk["vol60"] = annualized_volatility(values, 60)
                 rolling_high = max(values[-120:])
                 risk["drawdown_from_high"] = round((values[-1] / rolling_high - 1) * 100, 2)
             updates += 1
         except Exception as exc:
-            errors.append(f"{symbol}: {type(exc).__name__}: {exc}")
+            errors.append(f"{public_symbol}: {type(exc).__name__}: {exc}")
     return updates, errors
 
 
@@ -334,47 +379,10 @@ def ensure_defaults(data: dict) -> None:
     data.setdefault(
         "otc_limits",
         [
-            {
-                "limit_yuan": 100,
-                "status": "可申购",
-                "funds": ["建信 539001/012752"],
-                "note": "普通代销 A/C 份额快照",
-            },
-            {
-                "limit_yuan": 10,
-                "status": "可申购",
-                "funds": [
-                    "宝盈 019736/019737",
-                    "大成 000834/008971",
-                    "华安 040046/014978",
-                    "华泰柏瑞 019524/019525",
-                    "汇添富 018966/018967",
-                    "摩根 019172/019173",
-                    "南方 016452/016453",
-                    "万家 019441/019442",
-                    "招商 019547/019548",
-                ],
-                "note": "多只基金处于10元/日档",
-            },
-            {
-                "limit_yuan": 5,
-                "status": "可申购",
-                "funds": ["广发 270042/006479"],
-                "note": "普通代销 A/C 份额快照",
-            },
-            {
-                "limit_yuan": 0,
-                "status": "暂停申购/当前不可买",
-                "funds": [
-                    "国泰 160213",
-                    "华夏 015299/015300",
-                    "嘉实 016532/016533",
-                    "天弘 018043/018044",
-                    "易方达 161130/012870",
-                    "博时 016055/016057",
-                ],
-                "note": "页面可能显示上限，但暂停申购时实际可买按0处理",
-            },
+            {"limit_yuan": 100, "status": "可申购", "funds": ["建信 539001/012752"], "note": "普通代销 A/C 份额快照"},
+            {"limit_yuan": 10, "status": "可申购", "funds": ["宝盈 019736/019737", "大成 000834/008971", "华安 040046/014978", "华泰柏瑞 019524/019525", "汇添富 018966/018967", "摩根 019172/019173", "南方 016452/016453", "万家 019441/019442", "招商 019547/019548"], "note": "多只基金处于10元/日档"},
+            {"limit_yuan": 5, "status": "可申购", "funds": ["广发 270042/006479"], "note": "普通代销 A/C 份额快照"},
+            {"limit_yuan": 0, "status": "暂停申购/当前不可买", "funds": ["国泰 160213", "华夏 015299/015300", "嘉实 016532/016533", "天弘 018043/018044", "易方达 161130/012870", "博时 016055/016057"], "note": "页面可能显示上限，但暂停申购时实际可买按0处理"},
         ],
     )
 
@@ -393,15 +401,8 @@ def main() -> None:
     if fund_updates or risk_updates or history_updates:
         data["updated_at"] = data["checked_at"]
 
-    premium_dates = [
-        fund.get("premium_date")
-        for fund in data["funds"]
-        if fund.get("premium_date")
-    ]
-    risk_dates = [
-        data.get("risk", {}).get("vix_date"),
-        data.get("risk", {}).get("ndx_date"),
-    ]
+    premium_dates = [fund.get("premium_date") for fund in data["funds"] if fund.get("premium_date")]
+    risk_dates = [data.get("risk", {}).get("vix_date"), data.get("risk", {}).get("ndx_date")]
     all_dates = [value for value in premium_dates + risk_dates if value]
     data["market_data_as_of"] = max(all_dates) if all_dates else data.get("market_data_as_of")
 
@@ -412,18 +413,15 @@ def main() -> None:
         "risk_series_updated": risk_updates,
         "errors": errors,
     }
-    data["source_note_short"] = "ETF溢价：HaoETF/证券之星；行情：Yahoo Finance（失败保留旧值）"
+    data["source_note_short"] = "ETF溢价：HaoETF/证券之星；行情：Yahoo Finance，失败回退Stooq"
     data["source_note"] = (
         "ETF溢价优先读取HaoETF公开页面，失败时回退到证券之星折溢价历史；"
         "溢价历史百分位通过证券之星历史样本与本地每日样本合并计算；"
-        "VIX与纳指100使用Yahoo Finance公开行情序列。抓取失败会保留旧值，"
-        "不会用新时间覆盖成伪最新。综合评分仅用于市场总览横向比较。"
+        "VIX与纳指100优先使用Yahoo Finance公开行情序列，失败时回退Stooq CSV。"
+        "抓取失败会保留旧值，不会用新时间覆盖成伪最新。综合评分仅用于市场总览横向比较。"
     )
 
-    DATA_PATH.write_text(
-        json.dumps(data, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    DATA_PATH.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(
         f"ETF更新 {fund_updates}/12，溢价历史更新 {history_updates}/12，"
         f"风险序列更新 {risk_updates}/2，错误 {len(errors)} 个。"
