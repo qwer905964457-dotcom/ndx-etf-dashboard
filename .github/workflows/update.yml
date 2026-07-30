@@ -6,14 +6,16 @@ on:
     paths:
       - "update_data.py"
       - "patch_risk_sources.py"
+      - "data.json"
       - ".github/workflows/update.yml"
   schedule:
-    - cron: "40 1 * * 1-5"
-    - cron: "40 2 * * 1-5"
-    - cron: "40 3 * * 1-5"
-    - cron: "40 5 * * 1-5"
-    - cron: "40 6 * * 1-5"
-    - cron: "40 7 * * 1-5"
+    # A股交易时段附近更新日频/风险数据；避开整点拥挤调度点。
+    - cron: "43 1 * * 1-5"
+    - cron: "43 2 * * 1-5"
+    - cron: "43 3 * * 1-5"
+    - cron: "43 5 * * 1-5"
+    - cron: "43 6 * * 1-5"
+    - cron: "43 7 * * 1-5"
 
 permissions:
   contents: write
@@ -42,6 +44,8 @@ jobs:
         run: python patch_risk_sources.py
 
       - name: Update public market data
+        env:
+          PYTHONUNBUFFERED: "1"
         run: python update_data.py
 
       - name: Commit changes
