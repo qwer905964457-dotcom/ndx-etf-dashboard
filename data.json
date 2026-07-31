@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-31 21:16:32",
+  "updated_at": "2026-07-31 21:21:16",
   "market_data_as_of": "2026-07-31",
   "source_note": "ETF溢价优先读取HaoETF公开页面，失败时回退到证券之星折溢价历史；溢价历史百分位通过证券之星历史样本与本地每日样本合并计算；VIX与纳指100优先使用Yahoo Finance公开行情序列，失败时回退Nasdaq官方历史接口、CBOE VIX CSV和Stooq CSV。抓取失败会保留旧值，不会用新时间覆盖成伪最新。综合评分仅用于市场总览横向比较。",
   "risk": {
@@ -21,70 +21,70 @@
       "code": "159941",
       "company": "广发",
       "name": "纳指100 ETF",
-      "premium": 9.48,
+      "premium": 9.47,
       "premium_date": "2026-07-31",
       "premium_source": "HaoETF",
       "fee": 1.0,
       "tracking": null,
       "score": 52,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价9.48%（2026-07-31），综合费率1.00%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价9.47%（2026-07-31），综合费率1.00%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/159941"
     },
     {
       "code": "159632",
       "company": "华安",
       "name": "纳指100 ETF",
-      "premium": 7.31,
+      "premium": 7.27,
       "premium_date": "2026-07-31",
       "premium_source": "HaoETF",
       "fee": 0.8,
       "tracking": null,
       "score": 63,
       "grade": "B｜可比较",
-      "reason": "公开口径溢价7.31%（2026-07-31），综合费率0.80%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价7.27%（2026-07-31），综合费率0.80%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/159632"
     },
     {
       "code": "513100",
       "company": "国泰",
       "name": "纳指100 ETF",
-      "premium": 10.04,
+      "premium": 10.02,
       "premium_date": "2026-07-31",
       "premium_source": "HaoETF",
       "fee": 0.8,
       "tracking": null,
       "score": 52,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价10.04%（2026-07-31），综合费率0.80%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价10.02%（2026-07-31），综合费率0.80%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/513100"
     },
     {
       "code": "513300",
       "company": "华夏",
       "name": "纳指100 ETF",
-      "premium": 7.98,
+      "premium": 7.91,
       "premium_date": "2026-07-31",
       "premium_source": "HaoETF",
       "fee": 0.8,
       "tracking": null,
       "score": 60,
       "grade": "B｜可比较",
-      "reason": "公开口径溢价7.98%（2026-07-31），综合费率0.80%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价7.91%（2026-07-31），综合费率0.80%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/513300"
     },
     {
       "code": "513390",
       "company": "博时",
       "name": "纳指100 ETF",
-      "premium": 7.49,
+      "premium": 7.45,
       "premium_date": "2026-07-31",
       "premium_source": "HaoETF",
       "fee": 0.65,
       "tracking": null,
       "score": 64,
       "grade": "B｜可比较",
-      "reason": "公开口径溢价7.49%（2026-07-31），综合费率0.65%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价7.45%（2026-07-31），综合费率0.65%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/513390"
     },
     {
@@ -105,28 +105,28 @@
       "code": "159659",
       "company": "招商",
       "name": "纳指100 ETF",
-      "premium": 7.85,
+      "premium": 7.84,
       "premium_date": "2026-07-31",
       "premium_source": "HaoETF",
       "fee": 0.65,
       "tracking": null,
       "score": 62,
       "grade": "B｜可比较",
-      "reason": "公开口径溢价7.85%（2026-07-31），综合费率0.65%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价7.84%（2026-07-31），综合费率0.65%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/159659"
     },
     {
       "code": "513110",
       "company": "华泰柏瑞",
       "name": "纳指100 ETF",
-      "premium": 7.23,
+      "premium": 7.2,
       "premium_date": "2026-07-31",
       "premium_source": "HaoETF",
       "fee": 1.0,
       "tracking": null,
       "score": 61,
       "grade": "B｜可比较",
-      "reason": "公开口径溢价7.23%（2026-07-31），综合费率1.00%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价7.20%（2026-07-31），综合费率1.00%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/513110"
     },
     {
@@ -161,14 +161,14 @@
       "code": "159660",
       "company": "汇添富",
       "name": "纳指100 ETF",
-      "premium": 7.44,
+      "premium": 7.42,
       "premium_date": "2026-07-31",
       "premium_source": "HaoETF",
       "fee": 0.65,
       "tracking": null,
       "score": 64,
       "grade": "B｜可比较",
-      "reason": "公开口径溢价7.44%（2026-07-31），综合费率0.65%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价7.42%（2026-07-31），综合费率0.65%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/159660"
     },
     {
@@ -291,7 +291,7 @@
         },
         {
           "date": "2026-07-31",
-          "premium": 9.48
+          "premium": 9.47
         }
       ],
       "159632": [
@@ -397,7 +397,7 @@
         },
         {
           "date": "2026-07-31",
-          "premium": 7.31
+          "premium": 7.27
         }
       ],
       "513100": [
@@ -503,7 +503,7 @@
         },
         {
           "date": "2026-07-31",
-          "premium": 10.04
+          "premium": 10.02
         }
       ],
       "513300": [
@@ -609,7 +609,7 @@
         },
         {
           "date": "2026-07-31",
-          "premium": 7.98
+          "premium": 7.91
         }
       ],
       "513390": [
@@ -715,7 +715,7 @@
         },
         {
           "date": "2026-07-31",
-          "premium": 7.49
+          "premium": 7.45
         }
       ],
       "513870": [
@@ -919,7 +919,7 @@
         },
         {
           "date": "2026-07-31",
-          "premium": 7.85
+          "premium": 7.84
         }
       ],
       "513110": [
@@ -1025,7 +1025,7 @@
         },
         {
           "date": "2026-07-31",
-          "premium": 7.23
+          "premium": 7.2
         }
       ],
       "159513": [
@@ -1331,7 +1331,7 @@
         },
         {
           "date": "2026-07-31",
-          "premium": 7.44
+          "premium": 7.42
         }
       ],
       "159696": [
@@ -2398,7 +2398,7 @@
       }
     ]
   },
-  "checked_at": "2026-07-31 21:16:32",
+  "checked_at": "2026-07-31 21:21:16",
   "update_status": {
     "funds_updated": 11,
     "premium_history_updated": 12,
