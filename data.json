@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-25 18:31:40",
+  "updated_at": "2026-09-25 20:16:09",
   "market_data_as_of": "2026-09-24",
   "source_note": "ETF溢价优先读取HaoETF公开页面，失败时回退到证券之星折溢价历史；溢价历史百分位通过证券之星历史样本与本地每日样本合并计算；VIX与纳指100优先使用Yahoo Finance公开行情序列，失败时回退Nasdaq官方历史接口、CBOE VIX CSV和Stooq CSV。抓取失败会保留旧值，不会用新时间覆盖成伪最新。综合评分仅用于市场总览横向比较。",
   "risk": {
@@ -4314,7 +4314,7 @@
       }
     ]
   },
-  "checked_at": "2026-09-25 18:31:40",
+  "checked_at": "2026-09-25 20:16:09",
   "update_status": {
     "funds_updated": 12,
     "premium_history_updated": 12,
