@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-09-25 16:10:30",
+  "updated_at": "2026-09-25 17:04:42",
   "market_data_as_of": "2026-09-24",
   "source_note": "ETF溢价优先读取HaoETF公开页面，失败时回退到证券之星折溢价历史；溢价历史百分位通过证券之星历史样本与本地每日样本合并计算；VIX与纳指100优先使用Yahoo Finance公开行情序列，失败时回退Nasdaq官方历史接口、CBOE VIX CSV和Stooq CSV。抓取失败会保留旧值，不会用新时间覆盖成伪最新。综合评分仅用于市场总览横向比较。",
   "risk": {
@@ -4314,14 +4314,12 @@
       }
     ]
   },
-  "checked_at": "2026-09-25 16:10:30",
+  "checked_at": "2026-09-25 17:04:42",
   "update_status": {
-    "funds_updated": 11,
+    "funds_updated": 12,
     "premium_history_updated": 12,
     "risk_series_updated": 2,
-    "errors": [
-      "513870: HaoETF: 页面未解析到数据; 证券之星: ReadTimeout: HTTPSConnectionPool(host='fund.stockstar.com', port=443): Read timed out. (read timeout=25)"
-    ]
+    "errors": []
   },
   "settings": {
     "primary_etf": "513390",
