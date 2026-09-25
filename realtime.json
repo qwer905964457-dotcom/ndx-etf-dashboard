@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-25 13:59:00",
-  "updated_at": "2026-09-25 13:59:00",
+  "generated_at": "2026-09-25 19:41:29",
+  "updated_at": "2026-09-25 19:41:29",
   "market_status": {
     "date": "2026-09-25",
-    "time": "13:59:00",
+    "time": "19:41:29",
     "is_trading_day": false,
     "is_trading_session": false,
     "reason": "中秋节休市",
