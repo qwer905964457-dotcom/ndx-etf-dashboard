@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-01 15:00:58",
-  "updated_at": "2026-10-01 15:00:58",
+  "generated_at": "2026-10-01 22:24:20",
+  "updated_at": "2026-10-01 22:24:20",
   "market_status": {
     "date": "2026-10-01",
-    "time": "15:00:58",
+    "time": "22:24:20",
     "is_trading_day": false,
     "is_trading_session": false,
     "reason": "国庆节休市",
@@ -26,8 +26,8 @@
       "code": "159941",
       "company": "广发",
       "name": "广发纳指100ETF",
-      "price": 1.735,
-      "change_pct": 1.58,
+      "price": null,
+      "change_pct": null,
       "iopv": null,
       "premium": 13.56,
       "data_time": "2026-09-30",
@@ -40,15 +40,15 @@
       "fresh_label": "非今日数据，不提醒",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-09-30 15:34:09",
-      "quote_source": "东方财富行情接口"
+      "quote_time": null,
+      "quote_source": null
     },
     {
       "code": "159632",
       "company": "华安",
       "name": "华安纳指100ETF",
-      "price": 2.566,
-      "change_pct": 1.34,
+      "price": null,
+      "change_pct": null,
       "iopv": null,
       "premium": 10.65,
       "data_time": "2026-09-30",
@@ -61,15 +61,15 @@
       "fresh_label": "非今日数据，不提醒",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-09-30 15:34:21",
-      "quote_source": "东方财富行情接口"
+      "quote_time": null,
+      "quote_source": null
     },
     {
       "code": "513100",
       "company": "国泰",
       "name": "国泰纳指100ETF",
-      "price": 2.352,
-      "change_pct": 1.2,
+      "price": null,
+      "change_pct": null,
       "iopv": null,
       "premium": 15.27,
       "data_time": "2026-09-30",
@@ -82,15 +82,15 @@
       "fresh_label": "非今日数据，不提醒",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-09-30 16:12:01",
-      "quote_source": "东方财富行情接口"
+      "quote_time": null,
+      "quote_source": null
     },
     {
       "code": "513300",
       "company": "华夏",
       "name": "华夏纳指100ETF",
-      "price": 2.818,
-      "change_pct": 1.4,
+      "price": null,
+      "change_pct": null,
       "iopv": null,
       "premium": 11.18,
       "data_time": "2026-09-30",
@@ -103,15 +103,15 @@
       "fresh_label": "非今日数据，不提醒",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-09-30 16:11:33",
-      "quote_source": "东方财富行情接口"
+      "quote_time": null,
+      "quote_source": null
     },
     {
       "code": "513390",
       "company": "博时",
       "name": "博时纳指100ETF",
-      "price": 2.524,
-      "change_pct": 0.84,
+      "price": null,
+      "change_pct": null,
       "iopv": null,
       "premium": 10.18,
       "data_time": "2026-09-30",
@@ -124,15 +124,15 @@
       "fresh_label": "非今日数据，不提醒",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-09-30 16:11:35",
-      "quote_source": "东方财富行情接口"
+      "quote_time": null,
+      "quote_source": null
     },
     {
       "code": "513870",
       "company": "富国",
       "name": "富国纳指100ETF",
-      "price": 2.154,
-      "change_pct": 1.27,
+      "price": null,
+      "change_pct": null,
       "iopv": null,
       "premium": null,
       "data_time": null,
@@ -145,15 +145,15 @@
       "fresh_label": "溢价暂无数据，不提醒",
       "status": "暂无数据",
       "error": "513870: HaoETF: RuntimeError: HaoETF未解析到溢价",
-      "quote_time": "2026-09-30 16:11:43",
-      "quote_source": "东方财富行情接口"
+      "quote_time": null,
+      "quote_source": null
     },
     {
       "code": "159659",
       "company": "招商",
       "name": "招商纳指100ETF",
-      "price": 2.455,
-      "change_pct": 1.32,
+      "price": null,
+      "change_pct": null,
       "iopv": null,
       "premium": 11.31,
       "data_time": "2026-09-30",
@@ -166,15 +166,15 @@
       "fresh_label": "非今日数据，不提醒",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-09-30 15:34:36",
-      "quote_source": "东方财富行情接口"
+      "quote_time": null,
+      "quote_source": null
     },
     {
       "code": "513110",
       "company": "华泰柏瑞",
       "name": "华泰柏瑞纳指100ETF",
-      "price": 2.59,
-      "change_pct": 1.33,
+      "price": null,
+      "change_pct": null,
       "iopv": null,
       "premium": 10.52,
       "data_time": "2026-09-30",
@@ -187,15 +187,15 @@
       "fresh_label": "非今日数据，不提醒",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-09-30 16:11:56",
-      "quote_source": "东方财富行情接口"
+      "quote_time": null,
+      "quote_source": null
     },
     {
       "code": "159513",
       "company": "大成",
       "name": "大成纳指100ETF",
-      "price": 1.879,
-      "change_pct": 1.51,
+      "price": null,
+      "change_pct": null,
       "iopv": null,
       "premium": null,
       "data_time": null,
@@ -208,15 +208,15 @@
       "fresh_label": "溢价暂无数据，不提醒",
       "status": "暂无数据",
       "error": "159513: HaoETF: RuntimeError: HaoETF未解析到溢价",
-      "quote_time": "2026-09-30 15:34:24",
-      "quote_source": "东方财富行情接口"
+      "quote_time": null,
+      "quote_source": null
     },
     {
       "code": "159501",
       "company": "嘉实",
       "name": "嘉实纳指100ETF",
-      "price": 2.205,
-      "change_pct": -1.39,
+      "price": null,
+      "change_pct": null,
       "iopv": null,
       "premium": null,
       "data_time": null,
@@ -229,15 +229,15 @@
       "fresh_label": "溢价暂无数据，不提醒",
       "status": "暂无数据",
       "error": "159501: HaoETF: RuntimeError: HaoETF未解析到溢价",
-      "quote_time": "2026-09-30 15:34:18",
-      "quote_source": "东方财富行情接口"
+      "quote_time": null,
+      "quote_source": null
     },
     {
       "code": "159660",
       "company": "汇添富",
       "name": "汇添富纳指100ETF",
-      "price": 2.476,
-      "change_pct": 1.64,
+      "price": null,
+      "change_pct": null,
       "iopv": null,
       "premium": 11.04,
       "data_time": "2026-09-30",
@@ -250,15 +250,15 @@
       "fresh_label": "非今日数据，不提醒",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-09-30 15:34:54",
-      "quote_source": "东方财富行情接口"
+      "quote_time": null,
+      "quote_source": null
     },
     {
       "code": "159696",
       "company": "易方达",
       "name": "易方达纳指100ETF",
-      "price": 2.124,
-      "change_pct": 1.58,
+      "price": null,
+      "change_pct": null,
       "iopv": null,
       "premium": null,
       "data_time": null,
@@ -271,11 +271,12 @@
       "fresh_label": "溢价暂无数据，不提醒",
       "status": "暂无数据",
       "error": "159696: HaoETF: RuntimeError: HaoETF未解析到溢价",
-      "quote_time": "2026-09-30 15:34:51",
-      "quote_source": "东方财富行情接口"
+      "quote_time": null,
+      "quote_source": null
     }
   ],
   "errors": [
+    "东方财富行情接口: HTTPError: 502 Server Error: Bad Gateway for url: https://push2.eastmoney.com/api/qt/ulist.np/get?fltt=2&invt=2&fields=f12,f14,f2,f3,f4,f18,f124&secids=0.159941,0.159632,1.513100,1.513300,1.513390,1.513870,0.159659,1.513110,0.159513,0.159501,0.159660,0.159696",
     "513870: HaoETF: RuntimeError: HaoETF未解析到溢价",
     "159513: HaoETF: RuntimeError: HaoETF未解析到溢价",
     "159501: HaoETF: RuntimeError: HaoETF未解析到溢价",
