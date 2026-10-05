@@ -1,17 +1,17 @@
 {
-  "updated_at": "2026-10-05 17:35:26",
-  "market_data_as_of": "2026-10-02",
+  "updated_at": "2026-10-05 18:49:53",
+  "market_data_as_of": "2026-10-05",
   "source_note": "ETF溢价优先读取HaoETF公开页面，失败时回退到证券之星折溢价历史；溢价历史百分位通过证券之星历史样本与本地每日样本合并计算；VIX与纳指100优先使用Yahoo Finance公开行情序列，失败时回退Nasdaq官方历史接口、CBOE VIX CSV和Stooq CSV。抓取失败会保留旧值，不会用新时间覆盖成伪最新。综合评分仅用于市场总览横向比较。",
   "risk": {
-    "vix": 15.31,
+    "vix": 16.31,
     "ndx": 30807.93,
     "change1": 1.0,
     "change20": 4.5,
     "vol20": 15.2,
     "vol60": 18.74,
     "pe": null,
-    "vix_date": "2026-10-02",
-    "vix_source": "CBOE VIX历史CSV",
+    "vix_date": "2026-10-05",
+    "vix_source": "Yahoo Finance ^VIX",
     "ndx_date": "2026-10-02",
     "ndx_source": "Nasdaq官方历史接口 NDX",
     "drawdown_from_high": 0.0
@@ -3579,6 +3579,10 @@
     },
     "vix": [
       {
+        "date": "2026-04-17",
+        "value": 17.48
+      },
+      {
         "date": "2026-04-20",
         "value": 18.87
       },
@@ -3755,10 +3759,6 @@
         "value": 16.4
       },
       {
-        "date": "2026-06-19",
-        "value": 16.78
-      },
-      {
         "date": "2026-06-22",
         "value": 17.28
       },
@@ -3793,10 +3793,6 @@
       {
         "date": "2026-07-02",
         "value": 16.15
-      },
-      {
-        "date": "2026-07-03",
-        "value": 15.81
       },
       {
         "date": "2026-07-06",
@@ -4057,6 +4053,10 @@
       {
         "date": "2026-10-02",
         "value": 15.31
+      },
+      {
+        "date": "2026-10-05",
+        "value": 16.31
       }
     ],
     "ndx": [
@@ -4542,7 +4542,7 @@
       }
     ]
   },
-  "checked_at": "2026-10-05 17:35:26",
+  "checked_at": "2026-10-05 18:49:53",
   "update_status": {
     "funds_updated": 12,
     "premium_history_updated": 12,
