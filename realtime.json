@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06 15:21:54",
-  "updated_at": "2026-10-06 15:21:54",
+  "generated_at": "2026-10-06 22:17:54",
+  "updated_at": "2026-10-06 22:17:54",
   "market_status": {
     "date": "2026-10-06",
-    "time": "15:21:54",
+    "time": "22:17:54",
     "is_trading_day": false,
     "is_trading_session": false,
     "reason": "国庆节休市",
