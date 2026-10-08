@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-08 15:09:14",
-  "updated_at": "2026-10-08 15:09:14",
+  "generated_at": "2026-10-08 22:34:00",
+  "updated_at": "2026-10-08 22:34:00",
   "market_status": {
     "date": "2026-10-08",
-    "time": "15:09:14",
+    "time": "22:34:00",
     "is_trading_day": true,
     "is_trading_session": false,
     "reason": "交易日",
@@ -16,7 +16,7 @@
     "valid_count": 8,
     "alertable_count": 0,
     "lowest_code": "513110",
-    "lowest_premium": 9.55,
+    "lowest_premium": 9.09,
     "low_premium_count": 0,
     "high_premium_count": 8,
     "recommendation": "场外300元/交易日照常；场内额外仓只在低溢价可靠触发后再评估。"
@@ -29,8 +29,8 @@
       "price": 1.746,
       "change_pct": 0.63,
       "iopv": null,
-      "premium": 12.25,
-      "data_time": "2026-10-08 15:08:22",
+      "premium": 11.8,
+      "data_time": "2026-10-08 22:33:21",
       "source": "HaoETF公开页面",
       "source_url": "https://www.haoetf.com/qdii/159941",
       "source_label": "公开分钟级溢价",
@@ -40,7 +40,7 @@
       "fresh_label": "分钟级数据，但非交易时段，只展示",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-10-08 15:09:00",
+      "quote_time": "2026-10-08 15:34:12",
       "quote_source": "东方财富行情接口"
     },
     {
@@ -50,8 +50,8 @@
       "price": 2.587,
       "change_pct": 0.82,
       "iopv": null,
-      "premium": 9.59,
-      "data_time": "2026-10-08 15:08:34",
+      "premium": 9.14,
+      "data_time": "2026-10-08 22:33:36",
       "source": "HaoETF公开页面",
       "source_url": "https://www.haoetf.com/qdii/159632",
       "source_label": "公开分钟级溢价",
@@ -61,7 +61,7 @@
       "fresh_label": "分钟级数据，但非交易时段，只展示",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-10-08 15:09:15",
+      "quote_time": "2026-10-08 15:34:42",
       "quote_source": "东方财富行情接口"
     },
     {
@@ -71,8 +71,8 @@
       "price": 2.374,
       "change_pct": 0.94,
       "iopv": null,
-      "premium": 14.28,
-      "data_time": "2026-10-08 15:08:20",
+      "premium": 13.82,
+      "data_time": "2026-10-08 22:33:20",
       "source": "HaoETF公开页面",
       "source_url": "https://www.haoetf.com/qdii/513100",
       "source_label": "公开分钟级溢价",
@@ -82,7 +82,7 @@
       "fresh_label": "分钟级数据，但非交易时段，只展示",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-10-08 15:09:13",
+      "quote_time": "2026-10-08 16:11:50",
       "quote_source": "东方财富行情接口"
     },
     {
@@ -92,8 +92,8 @@
       "price": 2.84,
       "change_pct": 0.78,
       "iopv": null,
-      "premium": 10.07,
-      "data_time": "2026-10-08 15:08:33",
+      "premium": 9.61,
+      "data_time": "2026-10-08 22:33:34",
       "source": "HaoETF公开页面",
       "source_url": "https://www.haoetf.com/qdii/513300",
       "source_label": "公开分钟级溢价",
@@ -103,7 +103,7 @@
       "fresh_label": "分钟级数据，但非交易时段，只展示",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-10-08 15:08:56",
+      "quote_time": "2026-10-08 16:11:52",
       "quote_source": "东方财富行情接口"
     },
     {
@@ -113,8 +113,8 @@
       "price": 2.558,
       "change_pct": 1.35,
       "iopv": null,
-      "premium": 9.7,
-      "data_time": "2026-10-08 15:08:43",
+      "premium": 9.25,
+      "data_time": "2026-10-08 22:33:47",
       "source": "HaoETF公开页面",
       "source_url": "https://www.haoetf.com/qdii/513390",
       "source_label": "公开分钟级溢价",
@@ -124,7 +124,7 @@
       "fresh_label": "分钟级数据，但非交易时段，只展示",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-10-08 15:08:47",
+      "quote_time": "2026-10-08 16:12:01",
       "quote_source": "东方财富行情接口"
     },
     {
@@ -145,7 +145,7 @@
       "fresh_label": "溢价暂无数据，不提醒",
       "status": "暂无数据",
       "error": "513870: HaoETF: RuntimeError: HaoETF未解析到溢价",
-      "quote_time": "2026-10-08 15:09:06",
+      "quote_time": "2026-10-08 16:12:01",
       "quote_source": "东方财富行情接口"
     },
     {
@@ -155,8 +155,8 @@
       "price": 2.478,
       "change_pct": 0.94,
       "iopv": null,
-      "premium": 10.38,
-      "data_time": "2026-10-08 15:08:46",
+      "premium": 9.93,
+      "data_time": "2026-10-08 22:33:50",
       "source": "HaoETF公开页面",
       "source_url": "https://www.haoetf.com/qdii/159659",
       "source_label": "公开分钟级溢价",
@@ -166,7 +166,7 @@
       "fresh_label": "分钟级数据，但非交易时段，只展示",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-10-08 15:09:00",
+      "quote_time": "2026-10-08 15:34:39",
       "quote_source": "东方财富行情接口"
     },
     {
@@ -176,8 +176,8 @@
       "price": 2.613,
       "change_pct": 0.89,
       "iopv": null,
-      "premium": 9.55,
-      "data_time": "2026-10-08 15:08:42",
+      "premium": 9.09,
+      "data_time": "2026-10-08 22:33:46",
       "source": "HaoETF公开页面",
       "source_url": "https://www.haoetf.com/qdii/513110",
       "source_label": "公开分钟级溢价",
@@ -187,7 +187,7 @@
       "fresh_label": "分钟级数据，但非交易时段，只展示",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-10-08 15:09:04",
+      "quote_time": "2026-10-08 16:11:52",
       "quote_source": "东方财富行情接口"
     },
     {
@@ -208,7 +208,7 @@
       "fresh_label": "溢价暂无数据，不提醒",
       "status": "暂无数据",
       "error": "159513: HaoETF: RuntimeError: HaoETF未解析到溢价",
-      "quote_time": "2026-10-08 15:08:30",
+      "quote_time": "2026-10-08 15:34:39",
       "quote_source": "东方财富行情接口"
     },
     {
@@ -229,7 +229,7 @@
       "fresh_label": "溢价暂无数据，不提醒",
       "status": "暂无数据",
       "error": "159501: HaoETF: RuntimeError: HaoETF未解析到溢价",
-      "quote_time": "2026-10-08 15:08:45",
+      "quote_time": "2026-10-08 15:34:27",
       "quote_source": "东方财富行情接口"
     },
     {
@@ -239,8 +239,8 @@
       "price": 2.497,
       "change_pct": 0.85,
       "iopv": null,
-      "premium": 10.02,
-      "data_time": "2026-10-08 15:08:45",
+      "premium": 9.58,
+      "data_time": "2026-10-08 22:33:49",
       "source": "HaoETF公开页面",
       "source_url": "https://www.haoetf.com/qdii/159660",
       "source_label": "公开分钟级溢价",
@@ -250,7 +250,7 @@
       "fresh_label": "分钟级数据，但非交易时段，只展示",
       "status": "高溢价",
       "error": null,
-      "quote_time": "2026-10-08 15:09:00",
+      "quote_time": "2026-10-08 15:34:42",
       "quote_source": "东方财富行情接口"
     },
     {
@@ -271,7 +271,7 @@
       "fresh_label": "溢价暂无数据，不提醒",
       "status": "暂无数据",
       "error": "159696: HaoETF: RuntimeError: HaoETF未解析到溢价",
-      "quote_time": "2026-10-08 15:09:15",
+      "quote_time": "2026-10-08 15:34:39",
       "quote_source": "东方财富行情接口"
     }
   ],
