@@ -1,90 +1,90 @@
 {
-  "updated_at": "2026-11-10 01:49:13",
+  "updated_at": "2026-11-10 18:21:00",
   "market_data_as_of": "2026-11-10",
   "source_note": "ETF溢价优先读取HaoETF公开页面，失败时回退到证券之星折溢价历史；溢价历史百分位通过证券之星历史样本与本地每日样本合并计算；VIX与纳指100优先使用Yahoo Finance公开行情序列，失败时回退Nasdaq官方历史接口、CBOE VIX CSV和Stooq CSV。抓取失败会保留旧值，不会用新时间覆盖成伪最新。综合评分仅用于市场总览横向比较。",
   "risk": {
-    "vix": 25.64,
-    "ndx": 26989.99,
-    "change1": 1.35,
-    "change20": -12.61,
-    "vol20": 32.37,
-    "vol60": 22.48,
+    "vix": 19.92,
+    "ndx": 27907.62,
+    "change1": 3.4,
+    "change20": -8.99,
+    "vol20": 35.37,
+    "vol60": 23.61,
     "pe": null,
-    "vix_date": "2026-11-06",
+    "vix_date": "2026-11-09",
     "vix_source": "CBOE VIX历史CSV",
-    "ndx_date": "2026-11-06",
+    "ndx_date": "2026-11-09",
     "ndx_source": "Nasdaq官方历史接口 NDX",
-    "drawdown_from_high": -13.56
+    "drawdown_from_high": -10.62
   },
   "funds": [
     {
       "code": "159941",
       "company": "广发",
       "name": "纳指100 ETF",
-      "premium": 13.0,
+      "premium": 17.3,
       "premium_date": "2026-11-10",
       "premium_source": "HaoETF",
       "fee": 1.0,
       "tracking": null,
-      "score": 38,
+      "score": 21,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价13.00%（2026-11-10），综合费率1.00%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价17.30%（2026-11-10），综合费率1.00%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/159941"
     },
     {
       "code": "159632",
       "company": "华安",
       "name": "纳指100 ETF",
-      "premium": 10.13,
+      "premium": 14.52,
       "premium_date": "2026-11-10",
       "premium_source": "HaoETF",
       "fee": 0.8,
       "tracking": null,
-      "score": 51,
+      "score": 34,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价10.13%（2026-11-10），综合费率0.80%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价14.52%（2026-11-10），综合费率0.80%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/159632"
     },
     {
       "code": "513100",
       "company": "国泰",
       "name": "纳指100 ETF",
-      "premium": 15.13,
+      "premium": 18.88,
       "premium_date": "2026-11-10",
       "premium_source": "HaoETF",
       "fee": 0.8,
       "tracking": null,
-      "score": 31,
+      "score": 16,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价15.13%（2026-11-10），综合费率0.80%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价18.88%（2026-11-10），综合费率0.80%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/513100"
     },
     {
       "code": "513300",
       "company": "华夏",
       "name": "纳指100 ETF",
-      "premium": 11.7,
+      "premium": 15.8,
       "premium_date": "2026-11-10",
       "premium_source": "HaoETF",
       "fee": 0.8,
       "tracking": null,
-      "score": 45,
+      "score": 29,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价11.70%（2026-11-10），综合费率0.80%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价15.80%（2026-11-10），综合费率0.80%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/513300"
     },
     {
       "code": "513390",
       "company": "博时",
       "name": "纳指100 ETF",
-      "premium": 11.35,
+      "premium": 15.41,
       "premium_date": "2026-11-10",
       "premium_source": "HaoETF",
       "fee": 0.65,
       "tracking": null,
-      "score": 48,
+      "score": 32,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价11.35%（2026-11-10），综合费率0.65%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价15.41%（2026-11-10），综合费率0.65%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/513390"
     },
     {
@@ -105,42 +105,42 @@
       "code": "159659",
       "company": "招商",
       "name": "纳指100 ETF",
-      "premium": 12.25,
+      "premium": 16.56,
       "premium_date": "2026-11-10",
       "premium_source": "HaoETF",
       "fee": 0.65,
       "tracking": null,
-      "score": 44,
+      "score": 27,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价12.25%（2026-11-10），综合费率0.65%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价16.56%（2026-11-10），综合费率0.65%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/159659"
     },
     {
       "code": "513110",
       "company": "华泰柏瑞",
       "name": "纳指100 ETF",
-      "premium": 9.54,
+      "premium": 13.66,
       "premium_date": "2026-11-10",
       "premium_source": "HaoETF",
       "fee": 1.0,
       "tracking": null,
-      "score": 52,
+      "score": 35,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价9.54%（2026-11-10），综合费率1.00%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价13.66%（2026-11-10），综合费率1.00%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/513110"
     },
     {
       "code": "159513",
       "company": "大成",
       "name": "纳指100 ETF",
-      "premium": 18.86,
-      "premium_date": "2026-11-05",
+      "premium": 13.42,
+      "premium_date": "2026-11-06",
       "premium_source": "证券之星折溢价历史",
       "fee": 1.0,
       "tracking": null,
-      "score": 15,
+      "score": 36,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价18.86%（2026-11-05），综合费率1.00%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价13.42%（2026-11-06），综合费率1.00%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://fund.stockstar.com/funds/f10/fundzyj_159513.html"
     },
     {
@@ -161,14 +161,14 @@
       "code": "159660",
       "company": "汇添富",
       "name": "纳指100 ETF",
-      "premium": 11.47,
+      "premium": 15.4,
       "premium_date": "2026-11-10",
       "premium_source": "HaoETF",
       "fee": 0.65,
       "tracking": null,
-      "score": 48,
+      "score": 32,
       "grade": "C｜等待回落",
-      "reason": "公开口径溢价11.47%（2026-11-10），综合费率0.65%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
+      "reason": "公开口径溢价15.40%（2026-11-10），综合费率0.65%；评分仅用于市场总览横向比较，首页长期持仓不自动换基。",
       "source_url": "https://www.haoetf.com/qdii/159660"
     },
     {
@@ -567,7 +567,7 @@
         },
         {
           "date": "2026-11-06",
-          "premium": 16.14
+          "premium": 17.19
         },
         {
           "date": "2026-11-09",
@@ -575,7 +575,7 @@
         },
         {
           "date": "2026-11-10",
-          "premium": 13.0
+          "premium": 17.3
         }
       ],
       "159632": [
@@ -965,7 +965,7 @@
         },
         {
           "date": "2026-11-10",
-          "premium": 10.13
+          "premium": 14.52
         }
       ],
       "513100": [
@@ -1347,7 +1347,7 @@
         },
         {
           "date": "2026-11-06",
-          "premium": 18.45
+          "premium": 19.52
         },
         {
           "date": "2026-11-09",
@@ -1355,7 +1355,7 @@
         },
         {
           "date": "2026-11-10",
-          "premium": 15.13
+          "premium": 18.88
         }
       ],
       "513300": [
@@ -1745,7 +1745,7 @@
         },
         {
           "date": "2026-11-10",
-          "premium": 11.7
+          "premium": 15.8
         }
       ],
       "513390": [
@@ -2135,7 +2135,7 @@
         },
         {
           "date": "2026-11-10",
-          "premium": 11.35
+          "premium": 15.41
         }
       ],
       "513870": [
@@ -2879,7 +2879,7 @@
         },
         {
           "date": "2026-11-06",
-          "premium": 14.87
+          "premium": 15.92
         },
         {
           "date": "2026-11-09",
@@ -2887,7 +2887,7 @@
         },
         {
           "date": "2026-11-10",
-          "premium": 12.25
+          "premium": 16.56
         }
       ],
       "513110": [
@@ -3277,7 +3277,7 @@
         },
         {
           "date": "2026-11-06",
-          "premium": 12.46
+          "premium": 13.47
         },
         {
           "date": "2026-11-09",
@@ -3285,7 +3285,7 @@
         },
         {
           "date": "2026-11-10",
-          "premium": 9.54
+          "premium": 13.66
         }
       ],
       "159513": [
@@ -3664,6 +3664,10 @@
         {
           "date": "2026-11-05",
           "premium": 18.86
+        },
+        {
+          "date": "2026-11-06",
+          "premium": 13.42
         }
       ],
       "159501": [
@@ -4407,7 +4411,7 @@
         },
         {
           "date": "2026-11-06",
-          "premium": 14.31
+          "premium": 15.37
         },
         {
           "date": "2026-11-09",
@@ -4415,7 +4419,7 @@
         },
         {
           "date": "2026-11-10",
-          "premium": 11.47
+          "premium": 15.4
         }
       ],
       "159696": [
@@ -4782,10 +4786,6 @@
       ]
     },
     "vix": [
-      {
-        "date": "2026-05-25",
-        "value": 16.59
-      },
       {
         "date": "2026-05-26",
         "value": 17.01
@@ -5261,13 +5261,13 @@
       {
         "date": "2026-11-06",
         "value": 25.64
+      },
+      {
+        "date": "2026-11-09",
+        "value": 19.92
       }
     ],
     "ndx": [
-      {
-        "date": "2026-05-19",
-        "value": 28818.84
-      },
       {
         "date": "2026-05-20",
         "value": 29297.7
@@ -5743,12 +5743,16 @@
       {
         "date": "2026-11-06",
         "value": 26989.99
+      },
+      {
+        "date": "2026-11-09",
+        "value": 27907.62
       }
     ]
   },
-  "checked_at": "2026-11-10 01:49:13",
+  "checked_at": "2026-11-10 18:21:00",
   "update_status": {
-    "funds_updated": 10,
+    "funds_updated": 12,
     "premium_history_updated": 12,
     "risk_series_updated": 2,
     "errors": []
